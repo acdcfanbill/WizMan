@@ -17,12 +17,12 @@ namespace WizMan
     /// </summary>
     public class CameraManager : Microsoft.Xna.Framework.GameComponent
     {
-        Camera camera;
+        public Camera camera;
         Viewport defaultViewport;
 
-        Vector2 parallaxBackground;
-        Vector2 parallaxMidground;
-        Vector2 parallaxForeground;
+        public Vector2 parallaxBackground;
+        public Vector2 parallaxMidground;
+        public Vector2 parallaxForeground;
         
 
         public CameraManager(Game game, Viewport defaultViewport)
