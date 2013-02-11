@@ -9,12 +9,27 @@ namespace WizMan
 {
     class SimpleSprite
     {
-        Vector2 position;
+        //assuming position is upper left(0,0)
+        public Vector2 position;
         Texture2D texture;
 
-        public SimpleSprite(Texture texure, Vector2 position)
+        public SimpleSprite(Game game, Texture2D texture, Vector2 position)
         {
+            this.position = position;
+            this.texture = texture;
+        }
 
+        public int getWidth()
+        {
+            return texture.Width;
+        }
+        public int getHeight()
+        {
+            return texture.Height;
+        }
+        public Vector2 getCenter()
+        {
+            return new Vector2(position.X + (texture.Width / 2), position.Y + (texture.Height / 2));
         }
 
     }
