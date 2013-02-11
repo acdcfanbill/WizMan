@@ -10,17 +10,25 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
 
-namespace WizardTowerTestPart2
+namespace WizMan
 {
     /// <summary>
     /// This is a game component that implements IUpdateable.
     /// </summary>
     public class CameraManager : Microsoft.Xna.Framework.GameComponent
     {
-        public CameraManager(Game game)
+        Camera camera;
+        Viewport defaultViewport;
+
+        Vector2 parallaxBackground;
+        Vector2 parallaxMidground;
+        Vector2 parallaxForeground;
+        
+
+        public CameraManager(Game game, Viewport defaultViewport)
             : base(game)
         {
-            // TODO: Construct any child components here
+            this.defaultViewport = defaultViewport;
         }
 
         /// <summary>
@@ -29,7 +37,12 @@ namespace WizardTowerTestPart2
         /// </summary>
         public override void Initialize()
         {
-            // TODO: Add your initialization code here
+            //Camera initialization
+            parallaxBackground = new Vector2(0.5f);
+            parallaxMidground = new Vector2(0.75f);
+            parallaxForeground = new Vector2(1.0f);
+
+            camera = new Camera(defaultViewport);
 
             base.Initialize();
         }
@@ -39,10 +52,19 @@ namespace WizardTowerTestPart2
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Update(GameTime gameTime)
-        {
-            // TODO: Add your update code here
+        { 
+            //eventially do more sophisticated place checking here.
+            //for now, we will just have hte camera dutifly follow the player
 
+            camera.LookAt(Game1.spriteManager.getPlayerPosition(), defaultViewport);
             base.Update(gameTime);
         }
+
+        //not sure why I thought it should be drawable
+        //public override void Draw(GameTime gameTime)
+        //{
+
+        //    base.Draw(gameTime);
+        //}
     }
 }

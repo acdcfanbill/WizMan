@@ -29,7 +29,7 @@ namespace WizMan
     public class Game1 : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        public static SpriteBatch spriteBatch;
 
         //Scrolling Background
         SpriteBatch scrBgBatch;
@@ -39,30 +39,14 @@ namespace WizMan
         Vector2 bkgorigin;
         Rectangle mainFrame;
 
-        //Camera Background
-        Vector2 parallax;
-        Vector2 parallax2;
-        Vector2 parallax3;
-
         //Various managers
-        SpriteManager spriteManager;
-        Camera camera;
+        public static SpriteManager spriteManager;
+        public static CameraManager cameraManager;
+        public static Menus menu;
 
-        //Misc
-        KeyboardState keyboardState;
-
-        //Game States
-        enum GameState { MainMenu, InGame, GameOver }
-        GameState currentGameState = GameState.MainMenu;
-
-        //Main Menu Text
-        SpriteFont titleFont;
-        SpriteFont menuFont;
-        Color mColor;
-        string title;
-        List<String> menuOps;
-        int sel;
-
+        //GameState info
+        public enum GameState { MainMenu, PauseMenu, NewGame, InGame, GameOver }
+        public static GameState currentGameState = GameState.MainMenu;
 
 
         public Game1()
@@ -70,6 +54,7 @@ namespace WizMan
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
+            //don't want any of this stuff for deving, want a windowed game.
             //graphics.PreferredBackBufferWidth = 1024;
             //graphics.PreferredBackBufferHeight = 768;
             graphics.PreferMultiSampling = false;
@@ -89,9 +74,13 @@ namespace WizMan
             //Sprite manager handles the drawing for the player's sprite and various enemies.
             //Might also be able to use it for environmental objects such as boxes or rocks or platforms
             spriteManager = new SpriteManager(this);
+            cameraManager = new CameraManager(this, GraphicsDevice.Viewport);
+            menu = new Menus(this);
             Components.Add(spriteManager);
-            spriteManager.Enabled = false;
-            spriteManager.Visible = false;
+            Components.Add(cameraManager);
+            Components.Add(menu);
+            //spriteManager.Enabled = false;
+            //spriteManager.Visible = false;
 
 
             //Scrolling Background Initialization
@@ -104,20 +93,10 @@ namespace WizMan
             bkgorigin.Y = 0;
             graphics.ApplyChanges();
 
-            //Camera initialization
-            parallax = new Vector2(0.75f);
-            parallax2 = new Vector2(0.5f);
-            parallax3 = new Vector2(0.66f);
 
-            //menu
-            mColor = Color.WhiteSmoke;
-            title = "WIZ MAN";
-            menuOps = new List<string>();
-            menuOps.Add("Start New Game");
-            menuOps.Add("Instructions");
-            menuOps.Add("Exit Game");
-            sel = 0;
 
+            //make sure to start off in the Main Menu
+            currentGameState = GameState.MainMenu;
             base.Initialize();
 
 
@@ -135,16 +114,12 @@ namespace WizMan
             scrBgBatch = new SpriteBatch(GraphicsDevice);
 
             //Background Image
-            panobkg = Content.Load<Texture2D>("bgusd");
+            //panobkg = Content.Load<Texture2D>("bgusd");
 
-            //Text For menu 
-            titleFont = Content.Load<SpriteFont>("SpriteFont1");
-            menuFont = Content.Load<SpriteFont>("mFont");
+            //mainFrame = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
-            mainFrame = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-
-            camera = new Camera(GraphicsDevice.Viewport);
-            camera.ZoomLevel(0.5f);
+            //camera = new Camera(GraphicsDevice.Viewport);
+            //camera.ZoomLevel(1.0f);
 
             // TODO: use this.Content to load your game content here
         }
@@ -165,47 +140,24 @@ namespace WizMan
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            keyboardState = Keyboard.GetState();
+            //not sure why these spritemanager things are here, but i'm leaving them for now.
             switch (currentGameState)
             {
                 case GameState.MainMenu:
                     spriteManager.Enabled = false;
                     spriteManager.Visible = false;
-                    Boolean notPressed = true;
-                    if (keyboardState.IsKeyDown(Keys.S) || keyboardState.IsKeyDown(Keys.Down))
-                    {
-                        if (sel == 2)
-                        {
-                            sel = 0;
-                        }
-                        else sel++;
-                    }
-                    if (keyboardState.IsKeyDown(Keys.W) || keyboardState.IsKeyDown(Keys.Up))
-                    {
-                        if (sel == 0)
-                        {
-                            sel = 2;
-                        }
-                        else sel--;
-                    }
-                    if (keyboardState.IsKeyDown(Keys.Enter))
-                    {
-                        if (sel == 0) currentGameState = GameState.InGame;
-                        if (sel == 1) currentGameState = GameState.GameOver;
-                        if (sel == 2) currentGameState = GameState.GameOver;
-                    }
-
+                    break;
+                case GameState.NewGame:
+                    //do the code to start a new game
+                    currentGameState = GameState.InGame;
                     break;
                 case GameState.InGame:
                     spriteManager.Enabled = true;
                     spriteManager.Visible = true;
-
-
-                    int speed = 10;
-                    if (keyboardState.IsKeyDown(Keys.A) || keyboardState.IsKeyDown(Keys.Left))
-                        camera.Move(new Vector2(-speed, 0));
-                    if (keyboardState.IsKeyDown(Keys.D) || keyboardState.IsKeyDown(Keys.Right))
-                        camera.Move(new Vector2(speed, 0));
+                    break;
+                case GameState.PauseMenu:
+                    spriteManager.Enabled = false;
+                    spriteManager.Visible = false;
                     break;
                 case GameState.GameOver:
                     spriteManager.Enabled = false;
@@ -213,14 +165,6 @@ namespace WizMan
                     this.Exit();
                     break;
             }
-
-            // Allows the game to exit
-            // Escape works. Maybe later we make it a fancy menu, but only if it's fancy.
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
-                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                this.Exit();
-
-            // TODO: Add your update logic here
             base.Update(gameTime);
         }
 
@@ -233,39 +177,16 @@ namespace WizMan
             switch (currentGameState)
             {
                 case GameState.MainMenu:
-                    GraphicsDevice.Clear(Color.Black);
-                    spriteBatch.Begin();
-                    spriteBatch.DrawString(titleFont, title,
-                                            new Vector2((Window.ClientBounds.Width / 2) - (titleFont.MeasureString(title).X / 2),
-                                                        (Window.ClientBounds.Height / 2) - (titleFont.MeasureString(title).Y / 2) - 50), Color.Gold);
-                    int c = 0;
-                    for (int i = 0; i <= 2; i++)
-                    {
-                        if (sel == i) mColor = Color.Red;
-                        spriteBatch.DrawString(menuFont, menuOps[i],
-                                            new Vector2((Window.ClientBounds.Width / 2) - (titleFont.MeasureString(title).X / 2),
-                                                        (Window.ClientBounds.Height / 2) - (titleFont.MeasureString(title).Y / 2) + c), mColor);
-                        mColor = Color.WhiteSmoke;
-                        c += 20;
-                    }
-                    spriteBatch.End();
-
-                    break;
+                     break;
+                case GameState.NewGame:
+                     break;
                 case GameState.InGame:
-                    //draw the background first, with the slowest parallax
-                    GraphicsDevice.Clear(Color.Black);
-                    spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, camera.GetViewMatrix(parallax2));
-                    spriteBatch.Draw(panobkg, new Vector2(-panobkg.Width / 2.0f, -panobkg.Height / 2.0f), Color.White);
-                    spriteBatch.End();
-
+                    break;
+                case GameState.PauseMenu:
                     break;
                 case GameState.GameOver:
-
                     break;
             }
-
-
-            // TODO: Add your drawing code here
             base.Draw(gameTime);
         }
     }

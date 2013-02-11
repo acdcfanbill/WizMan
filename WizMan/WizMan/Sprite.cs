@@ -83,6 +83,11 @@ namespace WizMan
                     frameSize.Y - (collisionOffset * 2));
             }
         }
+
+        public Vector2 getPosition()
+        {
+            return position;
+        }
     }
     }
 

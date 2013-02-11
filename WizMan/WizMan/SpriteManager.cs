@@ -67,15 +67,21 @@ namespace WizMan
         {
             // TODO: Add your update code here
             //Update player
-            player.Update(gameTime, Game.Window.ClientBounds);
-            //Update each sprite in list
-            foreach (Sprite s in spriteList) {
-                s.Update(gameTime, Game.Window.ClientBounds);
-            }
-            foreach (Sprite w in worldList) {
-                w.Update(gameTime, Game.Window.ClientBounds);
-                if (w.collisionRect.Intersects(player.collisionRect)) {
-                    player.speedChange(w.collisionRect);
+            if (Game1.currentGameState == Game1.GameState.InGame)
+            {
+                player.Update(gameTime, Game.Window.ClientBounds);
+                //Update each sprite in list
+                foreach (Sprite s in spriteList)
+                {
+                    s.Update(gameTime, Game.Window.ClientBounds);
+                }
+                foreach (Sprite w in worldList)
+                {
+                    w.Update(gameTime, Game.Window.ClientBounds);
+                    if (w.collisionRect.Intersects(player.collisionRect))
+                    {
+                        player.speedChange(w.collisionRect);
+                    }
                 }
             }
             base.Update(gameTime);
@@ -83,15 +89,31 @@ namespace WizMan
 
         public override void Draw(GameTime gameTime)
         {
-            spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
-            //Draw the player
-            player.Draw(gameTime, spriteBatch);
-            //Draw all other sprites here, eventually
-            foreach (Sprite w in worldList) {
-                w.Draw(gameTime, spriteBatch);
+            if (Game1.currentGameState == Game1.GameState.InGame)
+            {
+                spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
+                //Draw the player
+                player.Draw(gameTime, spriteBatch);
+                //Draw all other sprites here, eventually
+                foreach (Sprite w in worldList)
+                {
+                    w.Draw(gameTime, spriteBatch);
+                }
+                spriteBatch.End();
             }
-            spriteBatch.End();
             base.Draw(gameTime);
+        }
+
+
+
+
+        ///
+        ///helper functions
+        ///
+        ///
+        public Vector2 getPlayerPosition()
+        {
+            return player.getPosition();
         }
     }
 }
