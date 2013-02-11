@@ -26,7 +26,10 @@ namespace WizMan
         //This was from the book. We'll have to get more specific for our functionality. Leaving it in for now.
         List<Sprite> spriteList = new List<Sprite>();
 
-        List<Sprite> worldList = new List<Sprite>();
+
+        List<Sprite> worldListBackground = new List<Sprite>();
+        List<Sprite> worldListMidground = new List<Sprite>();
+        List<Sprite> worldListForground = new List<Sprite>();
 
         public SpriteManager(Game game)
             : base(game)
@@ -53,7 +56,7 @@ namespace WizMan
                 Game.Content.Load<Texture2D>("wizard"), new Vector2 (0, 768-150), new Point (69, 143), 1, new Point (0, 0), new Point(1, 1),
                 new Vector2(6, 6));
 
-            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2 (120, 400),
+            worldListBackground.Add(new WorldSprite(Game.Content.Load<Texture2D>("bgusd"), new Vector2 (120, 400),
                new Point (608, 108), 2, new Point (0, 0), new Point(1, 1), Vector2.Zero));
 
             base.LoadContent();
