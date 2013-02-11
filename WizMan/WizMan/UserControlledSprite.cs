@@ -97,6 +97,7 @@ namespace WizMan
             //his hat doesn't hang on it. It actually kind of looks like he uses his hat as a fancy zipline device if
             //you take out the -143, which begs the question: Do we need to make his hat into a fancy zipline traversal tool?
             position.Y = (float)collisionRect.Y-143;
+            startY = position.Y;
         }
         
     }
