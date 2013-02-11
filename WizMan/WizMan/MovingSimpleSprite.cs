@@ -10,17 +10,17 @@ using Microsoft.Xna.Framework.Media;
 
 namespace WizMan
 {
-    class MovingSimpleSprite : SimpleSprite, Microsoft.Xna.Framework.IGameComponent
+    class MovingSimpleSprite : SimpleSprite
     {
         Vector2 velocity;
 
-        public MovingSimpleSprite(Game game, Texture2D texture, Vector2 position, Vector2 velocity)
-            : base(game, texture, position)
+        public MovingSimpleSprite(Texture2D texture, Vector2 position, Vector2 velocity)
+            : base(texture, position)
         {
             this.velocity = velocity;
         }
 
-        public override void Update(GameTime gameTime)
+        public void Update(GameTime gameTime)
         {
             position += velocity;
         }
