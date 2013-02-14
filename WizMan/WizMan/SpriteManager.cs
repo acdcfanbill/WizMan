@@ -71,7 +71,7 @@ namespace WizMan
 
 
             //load a mid background, trying it say, 5 tiles wide, the i* 1024 comes from knowing the width of this texture.
-            //also, the -512 is to start off to the size a bit so we don't see it.
+            //also, the -512 is to start off to the side a bit so we don't see it.
             for (int i = 0; i < 5; i++)
             {
                 backgrounds.Add(new SimpleSprite(Game.Content.Load<Texture2D>("textures/tempWall"), new Vector2(i*1024-512, -128)));
