@@ -31,6 +31,12 @@ namespace WizMan
         List<Sprite> worldList = new List<Sprite>();
         List<SimpleSprite> backgrounds = new List<SimpleSprite>();
 
+        //furthest away tiled background
+        Texture2D topBackground;
+        Texture2D middleBackground;
+        Texture2D bottomBackground;
+        FarthestBackground farthestBackground;
+
         public SpriteManager(Game game)
             : base(game)
         {
@@ -53,17 +59,31 @@ namespace WizMan
             //Loads the player's sprite
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             player = new UserControlledSprite(
-                Game.Content.Load<Texture2D>("wizard"), new Vector2 (0, 768-150), new Point (69, 143), 1, new Point (0, 0), new Point(1, 1),
+                Game.Content.Load<Texture2D>("wizard"), new Vector2 (0, 768-290), new Point (69, 143), 1, new Point (0, 0), new Point(1, 1),
                 new Vector2(6, 6));
 
-            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2 (120, 600),
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2 (0, 700),
                new Point (608, 108), 2, new Point (0, 0), new Point(1, 1), Vector2.Zero));
             worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(512, 500),
                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(1000, 700),
+                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
 
 
-            //load a background
-            backgrounds.Add(new SimpleSprite(Game.Content.Load<Texture2D>("bgusd"), new Vector2(0,0)));
+            //load a mid background, trying it say, 5 tiles wide, the i* 1024 comes from knowing the width of this texture.
+            //also, the -512 is to start off to the size a bit so we don't see it.
+            for (int i = 0; i < 5; i++)
+            {
+                backgrounds.Add(new SimpleSprite(Game.Content.Load<Texture2D>("textures/tempWall"), new Vector2(i*1024-512, -128)));
+            }
+
+
+            //load in the furthest tiled background
+            topBackground = Game.Content.Load<Texture2D>("textures/topBackground");
+            middleBackground = Game.Content.Load<Texture2D>("textures/middleBackground");
+            bottomBackground = Game.Content.Load<Texture2D>("textures/bottomBackground");
+            farthestBackground = new FarthestBackground(topBackground, middleBackground, bottomBackground, 10000, 10000, 600, -512);
+
 
 
             base.LoadContent();
@@ -101,6 +121,15 @@ namespace WizMan
         {
             if (Game1.currentGameState == Game1.GameState.InGame)
             {
+                //draw the farthest tiled background first
+                spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null,
+                    Game1.cameraManager.camera.GetViewMatrix(Game1.cameraManager.parallaxFarthestBackground));
+                farthestBackground.Draw(spriteBatch);
+                spriteBatch.End();
+
+
+                //draw the middle background next, this should be tower walls w/ see thru
+                //holes in it etc.
                 spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null,
                     Game1.cameraManager.camera.GetViewMatrix(Game1.cameraManager.parallaxBackground));
                 foreach (SimpleSprite s in backgrounds)

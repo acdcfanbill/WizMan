@@ -20,6 +20,7 @@ namespace WizMan
         public Camera camera;
         Viewport defaultViewport;
 
+        public Vector2 parallaxFarthestBackground;
         public Vector2 parallaxBackground;
         public Vector2 parallaxMidground;
         public Vector2 parallaxForeground;
@@ -38,6 +39,7 @@ namespace WizMan
         public override void Initialize()
         {
             //Camera initialization
+            parallaxFarthestBackground = new Vector2(0.1f);
             parallaxBackground = new Vector2(0.5f);
             parallaxMidground = new Vector2(0.75f);
             parallaxForeground = new Vector2(1.0f);
@@ -55,8 +57,16 @@ namespace WizMan
         { 
             //eventially do more sophisticated place checking here.
             //for now, we will just have hte camera dutifly follow the player
+            Vector2 playerPosition = Game1.spriteManager.getPlayerPosition();
 
-            camera.LookAt(Game1.spriteManager.getPlayerPosition(), defaultViewport);
+            //adjust the camera position
+            //eventially we will want to adjust it right/left for running right and left
+            //now i'm just centering him a bit more, also you will want to see more above
+            //than below
+
+            playerPosition.Y -= 125;
+            playerPosition.X += 75;
+            camera.LookAt(playerPosition, defaultViewport);
             base.Update(gameTime);
         }
 
