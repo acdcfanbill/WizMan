@@ -21,7 +21,7 @@ namespace WizMan
         //Variables to hold various kinds of sprites. Names should be obvious.
         SpriteBatch spriteBatch;
         //Holds player's sprite
-        UserControlledSprite player;
+        public UserControlledSprite player;
         
         //Holds automated sprites. Use this for enemies later on, I suppose.
         //This was from the book. We'll have to get more specific for our functionality. Leaving it in for now.
@@ -36,6 +36,7 @@ namespace WizMan
         Texture2D middleBackground;
         Texture2D bottomBackground;
         FarthestBackground farthestBackground;
+        Clouds clouds;
 
         public SpriteManager(Game game)
             : base(game)
@@ -59,7 +60,7 @@ namespace WizMan
             //Loads the player's sprite
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             player = new UserControlledSprite(
-                Game.Content.Load<Texture2D>("wizard"), new Vector2 (0, 768-290), new Point (69, 143), 1, new Point (0, 0), new Point(1, 1),
+                Game.Content.Load<Texture2D>("wizard"), new Vector2 (0, 250), new Point (69, 143), 1, new Point (0, 0), new Point(1, 1),
                 new Vector2(6, 6));
 
             worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2 (0, 700),
@@ -79,10 +80,12 @@ namespace WizMan
 
 
             //load in the furthest tiled background
+            //also putting some clouds out there
             topBackground = Game.Content.Load<Texture2D>("textures/topBackground");
             middleBackground = Game.Content.Load<Texture2D>("textures/middleBackground");
             bottomBackground = Game.Content.Load<Texture2D>("textures/bottomBackground");
             farthestBackground = new FarthestBackground(topBackground, middleBackground, bottomBackground, 10000, 10000, 600, -512);
+            clouds = new Clouds(Game.Content.Load<Texture2D>("textures/clouds"), 10000, 5000, new Vector2(-512, -5000), 0.1f);
 
 
 
@@ -113,6 +116,7 @@ namespace WizMan
                         player.speedChange(w.collisionRect);
                     }
                 }
+                clouds.Update(new Rectangle(0, 0, (int)Game1.screenSize.X, (int)Game1.screenSize.Y));
             }
             base.Update(gameTime);
         }
@@ -125,6 +129,7 @@ namespace WizMan
                 spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null,
                     Game1.cameraManager.camera.GetViewMatrix(Game1.cameraManager.parallaxFarthestBackground));
                 farthestBackground.Draw(spriteBatch);
+                clouds.Draw(spriteBatch);
                 spriteBatch.End();
 
 

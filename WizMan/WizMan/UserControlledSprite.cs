@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+
 namespace WizMan
 {
-    class UserControlledSprite : Sprite
+    public class UserControlledSprite : Sprite
     {
         bool jumping = false;
         bool canJump = true;
-        float startY;
+        //float startY;
         float jumpSpeed = 0;
         int amountAdded = 0;
         Vector2 lastPosition;
@@ -35,10 +37,7 @@ namespace WizMan
 
         public override void Update(GameTime gameTime, Rectangle clientBounds)
         {
-
-            //The missing piece of the movement puzzle. Have to tweak numbers a bit to get him movin' like he was.
             position += direction;
-
 
             base.Update(gameTime, clientBounds);
         }
@@ -59,6 +58,7 @@ namespace WizMan
             get
             {
                 Vector2 inputDirection = Vector2.Zero;
+
 
                 bool doJump = false;
                 if (Keyboard.GetState().IsKeyDown(Keys.Space))
@@ -120,6 +120,7 @@ namespace WizMan
                 {
                     canJump = true;
                     amountAdded = 0;
+                    Game1.audioManager.playJumpSound();
                 }
 
                 if (!jumping && canJump && position.Y == lastPosition.Y) //if you can jump, and you're not moving up and down

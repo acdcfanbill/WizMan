@@ -16,7 +16,7 @@ namespace WizMan
     {
         public Camera(Viewport viewport)
         {
-            Origin = new Vector2(viewport.Width * 2, viewport.Height);
+            Origin = new Vector2(viewport.Width / 2.0f, viewport.Height / 2.0f);
             Zoom = 1.0f;
         }
 

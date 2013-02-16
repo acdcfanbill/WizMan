@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace WizMan
 {
-    abstract class Sprite
+    public abstract class Sprite
     {
         //All of the variables associated with the sprite and sprite sheet.
         //Treating the wizard.png as a sprite sheet that is 1x1. Update logic reflects that
@@ -87,6 +87,10 @@ namespace WizMan
         public Vector2 getPosition()
         {
             return position;
+        }
+        public Vector2 getSize()
+        {
+            return new Vector2(textureImage.Width, textureImage.Height);
         }
     }
     }

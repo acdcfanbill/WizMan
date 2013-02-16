@@ -24,6 +24,15 @@ namespace WizMan
         public Vector2 parallaxBackground;
         public Vector2 parallaxMidground;
         public Vector2 parallaxForeground;
+        public Vector2 lookPosition;
+        Vector2 oldPlayerPosition;
+        Vector2 playerSize;
+        Vector2 screenSize;
+        Vector2 screenCenter;
+        bool goingRight;
+        bool goingLeft;
+        bool switchDirection = false;
+        bool alreadySwitch = false;
         
 
         public CameraManager(Game game, Viewport defaultViewport)
@@ -39,12 +48,25 @@ namespace WizMan
         public override void Initialize()
         {
             //Camera initialization
+            camera = new Camera(defaultViewport);
             parallaxFarthestBackground = new Vector2(0.1f);
             parallaxBackground = new Vector2(0.5f);
             parallaxMidground = new Vector2(0.75f);
             parallaxForeground = new Vector2(1.0f);
 
-            camera = new Camera(defaultViewport);
+            //initialize movement directions
+            goingRight = true;
+            goingLeft = false;
+
+            //get the player and screen info once
+            playerSize = Game1.spriteManager.player.getSize();
+            screenSize = Game1.screenSize;
+
+            //adjust camera position for good first view
+            camera.LookAt(new Vector2(0,-100), defaultViewport);
+
+            lookPosition = Vector2.Zero;
+            lookPosition.Y = camera.Position.Y + screenSize.Y - playerSize.Y - 50;
 
             base.Initialize();
         }
@@ -54,19 +76,34 @@ namespace WizMan
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Update(GameTime gameTime)
-        { 
-            //eventially do more sophisticated place checking here.
-            //for now, we will just have hte camera dutifly follow the player
+        {
             Vector2 playerPosition = Game1.spriteManager.getPlayerPosition();
+            screenCenter = camera.Position + (screenSize / 2);
 
-            //adjust the camera position
-            //eventially we will want to adjust it right/left for running right and left
-            //now i'm just centering him a bit more, also you will want to see more above
-            //than below
+            if (Keyboard.GetState().IsKeyDown(Keys.L))
+            {
+                if (!alreadySwitch)
+                    switchDirection = true;
+            }
+            else
+            {
+                switchDirection = false;
+                alreadySwitch = false;
+            }
 
-            playerPosition.Y -= 125;
-            playerPosition.X += 75;
-            camera.LookAt(playerPosition, defaultViewport);
+            if (switchDirection && !alreadySwitch)
+            {
+                switchDirection = false;
+                switchDirections(lookPosition);
+                alreadySwitch = true;
+            }
+            //if we arn't switching directions, just follow based on the deadzone in 
+            //cameraAdjustment
+            if(!switchDirection)
+                cameraAdjustment(playerPosition);
+
+            oldPlayerPosition = playerPosition;
+            camera.LookAt(lookPosition, defaultViewport);
             base.Update(gameTime);
         }
 
@@ -76,5 +113,80 @@ namespace WizMan
 
         //    base.Draw(gameTime);
         //}
+
+        public void cameraAdjustment(Vector2 playerPosition)
+        {
+            ///
+            /// this is to adjust the camera left and right according to the players movement
+            /// this depends on if the player is moving right or left.
+            /// my thinking is that each level will be 'mostly right' or 'mostly left' and we
+            /// will switch the direction with the cameramanager function only at the level
+            /// start because if you switch it when the player isn't centered it currently
+            /// looks funny.  that is, it jumps the camera to the opposite side
+            ///
+            #region Going Left And Right
+            if (goingRight)
+            {
+                if (playerPosition.X < camera.Position.X + playerSize.X)
+                {
+                    lookPosition.X += playerPosition.X - oldPlayerPosition.X;
+                }
+                if (playerPosition.X > screenCenter.X)
+                {
+                    lookPosition.X += playerPosition.X - oldPlayerPosition.X;
+                }
+            }
+            if (goingLeft)
+            {
+                if (playerPosition.X < screenCenter.X)
+                {
+                    lookPosition.X += playerPosition.X - oldPlayerPosition.X;
+                }
+                if (playerPosition.X > camera.Position.X + (screenSize.X - playerSize.X*2))
+                {
+                    lookPosition.X += playerPosition.X - oldPlayerPosition.X;
+                }
+            }
+            #endregion
+            ///
+            ///Adjusts the camera's up and down movement the -50 is just an offset to keep him
+            ///somewhat above the screen.  we can change this or possibly make it adjustable
+            ///
+            #region Going Up and Down
+            if (playerPosition.Y < camera.Position.Y)
+                lookPosition.Y += playerPosition.Y - oldPlayerPosition.Y;
+            if (playerPosition.Y > camera.Position.Y + screenSize.Y - playerSize.Y - 50)
+                lookPosition.Y += playerPosition.Y - oldPlayerPosition.Y;
+            #endregion
+        }
+        public void switchDirections(Vector2 newLookPos)
+        {
+            //if you switch the directions you MUST MAKE SURE THE CAMERA IS CENTERED on the
+            //the players X coordinate first otherwise it will goof up the following.
+            //to simplify this, I've just moved the camera's look position to the center X
+            //coordt whenever we run this.
+            Vector2 playerPosition = Game1.spriteManager.getPlayerPosition();
+
+            if (goingRight)
+            {
+                if (playerPosition.X < screenCenter.X)
+                {
+                    newLookPos.X = playerPosition.X;
+                    lookPosition = newLookPos;
+                }
+                goingRight = false;
+                goingLeft = true;
+            }
+            else
+            {
+                if (playerPosition.X > screenCenter.X)
+                {
+                    newLookPos.X = playerPosition.X;
+                    lookPosition = newLookPos;
+                }
+                goingRight = true;
+                goingLeft = false;
+            }
+        }
     }
 }

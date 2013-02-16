@@ -31,17 +31,23 @@ namespace WizMan
         GraphicsDeviceManager graphics;
         public static SpriteBatch spriteBatch;
 
+        //graphics properties
+        private int preferredWidth;
+        private int preferredHeight;
+        public static Vector2 screenSize;
+
         //Scrolling Background
-        SpriteBatch scrBgBatch;
-        Texture2D panobkg;
-        Rectangle bkg;
-        Vector2 bkgpos;
-        Vector2 bkgorigin;
-        Rectangle mainFrame;
+        //SpriteBatch scrBgBatch;
+        //Texture2D panobkg;
+        //Rectangle bkg;
+        //Vector2 bkgpos;
+        //Vector2 bkgorigin;
+        //Rectangle mainFrame;
 
         //Various managers
         public static SpriteManager spriteManager;
         public static CameraManager cameraManager;
+        public static AudioManager audioManager;
         public static Menus menu;
 
         //GameState info
@@ -54,9 +60,13 @@ namespace WizMan
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            //don't want any of this stuff for deving, want a windowed game.
-            //graphics.PreferredBackBufferWidth = 1024;
-            //graphics.PreferredBackBufferHeight = 768;
+            preferredWidth = 1024;
+            preferredHeight = 768;
+            screenSize = new Vector2(preferredWidth, preferredHeight);
+
+            //don't want fulscreen deving, want a windowed game.
+            graphics.PreferredBackBufferWidth = 1024;
+            graphics.PreferredBackBufferHeight = 768;
             graphics.PreferMultiSampling = false;
             graphics.IsFullScreen = false;
         }
@@ -75,24 +85,14 @@ namespace WizMan
             //Might also be able to use it for environmental objects such as boxes or rocks or platforms
             spriteManager = new SpriteManager(this);
             cameraManager = new CameraManager(this, GraphicsDevice.Viewport);
+            audioManager = new AudioManager(this);
             menu = new Menus(this);
             Components.Add(spriteManager);
             Components.Add(cameraManager);
+            Components.Add(audioManager);
             Components.Add(menu);
-            //spriteManager.Enabled = false;
-            //spriteManager.Visible = false;
-
-
-            //Scrolling Background Initialization
-            bkgpos.X = 0;
-            bkgpos.Y = 0;
-            graphics.PreferredBackBufferWidth = 1024;
-            graphics.PreferredBackBufferHeight = 768;
-            bkg = new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
-            bkgorigin.X = 0;
-            bkgorigin.Y = 0;
-            graphics.ApplyChanges();
-
+            spriteManager.Enabled = false;
+            spriteManager.Visible = false;
 
 
             //make sure to start off in the Main Menu
@@ -111,15 +111,6 @@ namespace WizMan
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            scrBgBatch = new SpriteBatch(GraphicsDevice);
-
-            //Background Image
-            //panobkg = Content.Load<Texture2D>("bgusd");
-
-            //mainFrame = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-
-            //camera = new Camera(GraphicsDevice.Viewport);
-            //camera.ZoomLevel(1.0f);
 
             // TODO: use this.Content to load your game content here
         }
