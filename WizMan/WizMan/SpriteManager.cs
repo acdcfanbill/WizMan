@@ -74,7 +74,7 @@ namespace WizMan
             
             
             //list of sprites that will do damage
-            damageList.Add(new DamageSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"),1000,new Vector2(-512,900),new Point(10000,10),2,Point.Zero,new Point(1,1),Vector2.Zero));
+            damageList.Add(new DamageSprite(Game.Content.Load<Texture2D>("textures/clearPixel"),1000,new Vector2(-512,900),new Point(10000,10),2,Point.Zero,new Point(1,1),Vector2.Zero));
 
 
             //load a mid background, trying it say, 5 tiles wide, the i* 1024 comes from knowing the width of this texture.
