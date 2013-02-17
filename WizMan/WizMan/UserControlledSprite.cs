@@ -12,6 +12,7 @@ namespace WizMan
 {
     public class UserControlledSprite : Sprite
     {
+        public int health;
         bool jumping = false;
         bool canJump = true;
         //float startY;
@@ -38,6 +39,8 @@ namespace WizMan
         public override void Update(GameTime gameTime, Rectangle clientBounds)
         {
             position += direction;
+            if (this.health < 1)
+                Game1.currentGameState = Game1.GameState.GameOver;
 
             base.Update(gameTime, clientBounds);
         }
@@ -139,5 +142,29 @@ namespace WizMan
                 return inputDirection * speed;
             }
         }
+
+        /// <summary> Health getters and setters
+        /// Going to need to be able to get and add or remove health for the player
+        /// this will let other things get the health and add or remove it
+        /// 
+        /// the convention is to give a postive value (10) and then either remove or add that
+        /// amount.  i.e. if you start with 100 hp, addHealth(10) = 110hp, and 
+        /// removeHealth(10) = 90hp.
+        /// </summary>
+        /// <returns></returns>
+        #region Health getters and setters
+        public int getHealth()
+        {
+            return this.health;
+        }
+        public void addHealth(int health)
+        {
+            this.health += health;
+        }
+        public void removeHealth(int health)
+        {
+            this.health -= health;
+        }
+        #endregion
     }
 }

@@ -36,13 +36,7 @@ namespace WizMan
         private int preferredHeight;
         public static Vector2 screenSize;
 
-        //Scrolling Background
-        //SpriteBatch scrBgBatch;
-        //Texture2D panobkg;
-        //Rectangle bkg;
-        //Vector2 bkgpos;
-        //Vector2 bkgorigin;
-        //Rectangle mainFrame;
+        private bool fullscreen = false;
 
         //Various managers
         public static SpriteManager spriteManager;
@@ -51,7 +45,7 @@ namespace WizMan
         public static Menus menu;
 
         //GameState info
-        public enum GameState { MainMenu, PauseMenu, NewGame, InGame, GameOver }
+        public enum GameState { MainMenu, PauseMenu, NewGame, InGame, GameOver, GameExit }
         public static GameState currentGameState = GameState.MainMenu;
 
 
@@ -60,15 +54,26 @@ namespace WizMan
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            preferredWidth = 1024;
-            preferredHeight = 768;
-            screenSize = new Vector2(preferredWidth, preferredHeight);
+            //fullscreen = true;
 
+            if (fullscreen)
+            {
+                preferredWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+                preferredHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+                graphics.IsFullScreen = true;
+            }
+            else
+            {
+                preferredWidth = 1024;
+                preferredHeight = 768;
+                graphics.IsFullScreen = false;
+            }
             //don't want fulscreen deving, want a windowed game.
-            graphics.PreferredBackBufferWidth = 1024;
-            graphics.PreferredBackBufferHeight = 768;
+            graphics.PreferredBackBufferWidth = preferredWidth;
+            graphics.PreferredBackBufferHeight = preferredHeight;
             graphics.PreferMultiSampling = false;
-            graphics.IsFullScreen = false;
+                            
+            screenSize = new Vector2(preferredWidth, preferredHeight);
         }
 
         /// <summary>
@@ -83,16 +88,16 @@ namespace WizMan
             //Creates the sprite manager and lets us use it.
             //Sprite manager handles the drawing for the player's sprite and various enemies.
             //Might also be able to use it for environmental objects such as boxes or rocks or platforms
-            spriteManager = new SpriteManager(this);
-            cameraManager = new CameraManager(this, GraphicsDevice.Viewport);
-            audioManager = new AudioManager(this);
+            //spriteManager = new SpriteManager(this);
+            //cameraManager = new CameraManager(this, GraphicsDevice.Viewport);
+            //audioManager = new AudioManager(this);
             menu = new Menus(this);
-            Components.Add(spriteManager);
-            Components.Add(cameraManager);
-            Components.Add(audioManager);
+            //Components.Add(spriteManager);
+            //Components.Add(cameraManager);
+            //Components.Add(audioManager);
             Components.Add(menu);
-            spriteManager.Enabled = false;
-            spriteManager.Visible = false;
+            //spriteManager.Enabled = false;
+            //spriteManager.Visible = false;
 
 
             //make sure to start off in the Main Menu
@@ -131,15 +136,19 @@ namespace WizMan
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            //not sure why these spritemanager things are here, but i'm leaving them for now.
             switch (currentGameState)
             {
                 case GameState.MainMenu:
-                    spriteManager.Enabled = false;
-                    spriteManager.Visible = false;
+                    //spriteManager.Enabled = false;
+                    //spriteManager.Visible = false;
                     break;
                 case GameState.NewGame:
-                    //do the code to start a new game
+                    spriteManager = new SpriteManager(this);
+                    cameraManager = new CameraManager(this, GraphicsDevice.Viewport);
+                    audioManager = new AudioManager(this);
+                    Components.Add(spriteManager);
+                    Components.Add(cameraManager);
+                    Components.Add(audioManager);
                     currentGameState = GameState.InGame;
                     break;
                 case GameState.InGame:
@@ -153,6 +162,11 @@ namespace WizMan
                 case GameState.GameOver:
                     spriteManager.Enabled = false;
                     spriteManager.Visible = false;
+                    Components.Remove(spriteManager);
+                    Components.Remove(cameraManager);
+                    Components.Remove(audioManager);
+                    break;
+                case GameState.GameExit:
                     this.Exit();
                     break;
             }

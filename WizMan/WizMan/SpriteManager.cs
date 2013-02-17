@@ -30,6 +30,7 @@ namespace WizMan
 
         List<Sprite> worldList = new List<Sprite>();
         List<SimpleSprite> backgrounds = new List<SimpleSprite>();
+        List<DamageSprite> damageList = new List<DamageSprite>();
 
         //furthest away tiled background
         Texture2D topBackground;
@@ -62,6 +63,7 @@ namespace WizMan
             player = new UserControlledSprite(
                 Game.Content.Load<Texture2D>("wizard"), new Vector2 (0, 250), new Point (69, 143), 1, new Point (0, 0), new Point(1, 1),
                 new Vector2(6, 6));
+            player.addHealth(100);
 
             worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2 (0, 700),
                new Point (608, 108), 2, new Point (0, 0), new Point(1, 1), Vector2.Zero));
@@ -69,6 +71,10 @@ namespace WizMan
                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
             worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(1000, 700),
                 new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            
+            
+            //list of sprites that will do damage
+            damageList.Add(new DamageSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"),1000,new Vector2(-512,900),new Point(10000,10),2,Point.Zero,new Point(1,1),Vector2.Zero));
 
 
             //load a mid background, trying it say, 5 tiles wide, the i* 1024 comes from knowing the width of this texture.
@@ -116,7 +122,17 @@ namespace WizMan
                         player.speedChange(w.collisionRect);
                     }
                 }
-                clouds.Update(new Rectangle(0, 0, (int)Game1.screenSize.X, (int)Game1.screenSize.Y));
+                foreach (DamageSprite w in damageList)
+                {
+                    w.Update(gameTime, Game.Window.ClientBounds);
+                    if (w.collisionRect.Intersects(player.collisionRect))
+                    {
+                        player.removeHealth(w.getDamage());
+                    }
+                }
+
+                //update the cloud position each frame.
+                clouds.Update(Game.Window.ClientBounds);
             }
             base.Update(gameTime);
         }

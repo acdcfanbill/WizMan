@@ -5,8 +5,10 @@ Content\textures\bottomBackground.xnb
 Content\textures\middleBackground.xnb
 Content\textures\topBackground.xnb
 Content\textures\tempWall.xnb
+Content\textures\clouds.xnb
 Content\jump.xnb
+Content\sounds\jump.xnb
 Content\SpriteFont1.xnb
 Content\mFont.xnb
-Content\textures\clouds.xnb
-Content\sounds\jump.xnb
+Content\textures\clearPixel.xnb
+Content\deathScreen.xnb

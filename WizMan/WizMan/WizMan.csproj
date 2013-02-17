@@ -130,7 +130,7 @@
     <Compile Include="CameraManager.cs" />
     <Compile Include="Couds.cs" />
     <Compile Include="FarthestBackground.cs" />
-    <Compile Include="KillSprite.cs" />
+    <Compile Include="DamageSprite.cs" />
     <Compile Include="Menus.cs" />
     <Compile Include="IBackground.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
