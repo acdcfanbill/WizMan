@@ -49,7 +49,7 @@ namespace WizMan
         {
             //Camera initialization
             camera = new Camera(defaultViewport);
-            parallaxFarthestBackground = new Vector2(0.1f);
+            parallaxFarthestBackground = new Vector2(0.25f);
             parallaxBackground = new Vector2(0.5f);
             parallaxMidground = new Vector2(0.75f);
             parallaxForeground = new Vector2(1.0f);

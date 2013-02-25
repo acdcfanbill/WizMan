@@ -48,6 +48,10 @@ namespace WizMan
         public enum GameState { MainMenu, PauseMenu, NewGame, InGame, GameOver, GameExit }
         public static GameState currentGameState = GameState.MainMenu;
 
+        //PlayerState info
+        public enum PlayerState { Standing, Running, Jumping, Falling };
+        public static PlayerState currentPlayerState = PlayerState.Standing;
+
 
         public Game1()
         {

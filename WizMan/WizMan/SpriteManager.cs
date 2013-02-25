@@ -22,6 +22,7 @@ namespace WizMan
         SpriteBatch spriteBatch;
         //Holds player's sprite
         public UserControlledSprite player;
+        Vector2 previousPosition;
         
         //Holds automated sprites. Use this for enemies later on, I suppose.
         //This was from the book. We'll have to get more specific for our functionality. Leaving it in for now.
@@ -71,6 +72,8 @@ namespace WizMan
                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
             worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(1000, 700),
                 new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(600, 200),
+                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
             
             
             //list of sprites that will do damage
@@ -108,20 +111,32 @@ namespace WizMan
             //Update player
             if (Game1.currentGameState == Game1.GameState.InGame)
             {
+                //store players previous position for later use
+                previousPosition = player.getPosition();
+                //update the player based on the keyboard input
                 player.Update(gameTime, Game.Window.ClientBounds);
+
                 //Update each sprite in list
                 foreach (Sprite s in spriteList)
                 {
                     s.Update(gameTime, Game.Window.ClientBounds);
                 }
+                //need a list of sprites to check collisions on
+                List<Sprite> wList = new List<Sprite>();
                 foreach (Sprite w in worldList)
                 {
                     w.Update(gameTime, Game.Window.ClientBounds);
-                    if (w.collisionRect.Intersects(player.collisionRect))
+                    if(w.collisionRect.Intersects(player.collisionRect))
                     {
-                        player.speedChange(w.collisionRect);
+                        wList.Add(w);
                     }
                 }
+                //handle all the sprite collisions
+                player.HandleCollision(wList, previousPosition);
+                //remove/clean the list
+                wList.Clear();
+
+                //check for any damage sprites that affect the player
                 foreach (DamageSprite w in damageList)
                 {
                     w.Update(gameTime, Game.Window.ClientBounds);
@@ -133,6 +148,7 @@ namespace WizMan
 
                 //update the cloud position each frame.
                 clouds.Update(Game.Window.ClientBounds);
+
             }
             base.Update(gameTime);
         }
@@ -152,7 +168,7 @@ namespace WizMan
                 //draw the middle background next, this should be tower walls w/ see thru
                 //holes in it etc.
                 spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null,
-                    Game1.cameraManager.camera.GetViewMatrix(Game1.cameraManager.parallaxBackground));
+                    Game1.cameraManager.camera.GetViewMatrix(Game1.cameraManager.parallaxMidground));
                 foreach (SimpleSprite s in backgrounds)
                     s.Draw(gameTime, spriteBatch);
                 spriteBatch.End();

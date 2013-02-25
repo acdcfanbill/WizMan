@@ -6,9 +6,9 @@ Content\textures\middleBackground.xnb
 Content\textures\topBackground.xnb
 Content\textures\tempWall.xnb
 Content\textures\clouds.xnb
+Content\textures\clearPixel.xnb
+Content\deathScreen.xnb
 Content\jump.xnb
 Content\sounds\jump.xnb
 Content\SpriteFont1.xnb
 Content\mFont.xnb
-Content\textures\clearPixel.xnb
-Content\deathScreen.xnb

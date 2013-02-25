@@ -77,10 +77,10 @@ namespace WizMan
             get
             {
                 return new Rectangle(
-                    (int)position.X + collisionOffset,
-                    (int)position.Y + collisionOffset,
-                    frameSize.X - (collisionOffset * 2),
-                    frameSize.Y - (collisionOffset * 2));
+                    (int)position.X - collisionOffset,
+                    (int)position.Y - collisionOffset,
+                    frameSize.X + (collisionOffset),
+                    frameSize.Y + (collisionOffset));
             }
         }
 
@@ -92,6 +92,10 @@ namespace WizMan
         {
             return new Vector2(textureImage.Width, textureImage.Height);
         }
+        public void setPosition(Vector2 newPosition)
+        {
+            this.position = newPosition;
+        }
     }
-    }
+}
 

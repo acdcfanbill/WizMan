@@ -53,6 +53,86 @@ namespace WizMan
             position.Y = (float)collisionRect.Y - 144;
             //startY = position.Y;
         }
+        public void HandleCollision(List<Sprite> wList, Vector2 previousPosition)
+        {
+            Vector2 currPos = this.position;
+
+            //backup player to previous position, because there was no collisions there
+            this.position = previousPosition;
+
+            //bools to that are set whether we can go up/down/left right
+            bool noUp = false; bool noDown = false; bool noLeft = false; bool noRight = false;
+            //create offsets for our advanced collsions.  the offset is the distance we just moved
+            int ix = Math.Abs((int)currPos.X - (int)previousPosition.X);
+            int iy = Math.Abs((int)currPos.Y - (int)previousPosition.Y);
+
+            //create four collision rectangles, one above our player, one below our player one to the 
+            //left and one tothe right.  If the upper one intersects any of hte current sprites we are hitting
+            //the we know we can't move up.  Do the same for the other 3 direction.
+            Rectangle down = this.collisionRect;
+                down.Y+=iy;
+            Rectangle up = this.collisionRect;
+                up.Y-=iy;
+            Rectangle left = this.collisionRect;
+                left.X-=ix;
+            Rectangle right = this.collisionRect;
+                right.X+=ix;
+
+            //preset our collision-fixed new position to the players current position.
+            Vector2 newBottom = currPos;
+            Vector2 newTop = currPos;
+            Vector2 newLeft = currPos;
+            Vector2 newRight = currPos;
+
+            //check the four new collsion rectangels to all of hte possible collisions we passed in.
+            //we may be running into more than one block at a time, so we may have to stop downward
+            //movement and rightward movement at the same time.
+            foreach (Sprite w in wList)
+            {
+                if (down.Intersects(w.collisionRect))
+                {
+                    noDown = true;
+                    newBottom.Y = w.collisionRect.Top;
+                }
+                if (up.Intersects(w.collisionRect))
+                {
+                    noUp = true;
+                    newTop.Y = w.collisionRect.Bottom;
+                }
+                if (left.Intersects(w.collisionRect))
+                {
+                    noLeft = true;
+                    newLeft.X = w.collisionRect.Right;
+                }
+                if (right.Intersects(w.collisionRect))
+                {
+                    noRight = true;
+                    newRight.X = w.collisionRect.Left;
+                }
+            }
+            //if we've stopped upward movement, reset some stuff so we stop jumping and we can jump later on
+            if (noUp)
+            {
+                //this will be changed if we get around to changing the movement to different enumerated states.
+                this.jumpSpeed = 0;
+                this.jumping = false;
+                this.canJump = true;
+            }
+
+            //check to see if we need to step the player back in the x or y directions
+            if(noDown && currPos.Y > previousPosition.Y)
+                currPos.Y = newBottom.Y-this.frameSize.Y;//previousPosition.Y;
+            else if(noUp && currPos.Y < previousPosition.Y)
+                currPos.Y = newTop.Y;// previousPosition.Y;
+            if(noLeft && currPos.X < previousPosition.X)
+                currPos.X = newLeft.X+1;// previousPosition.X;
+            if(noRight && currPos.X > previousPosition.X)
+                currPos.X = newRight.X - this.frameSize.X;// previousPosition.X;
+
+            //reset the position, with adjustments if necessary
+            setPosition(currPos);
+            return;
+        }
 
         //Controls player movement. Considering game gravity to be a part of player movement since it's
         //the other half of the jump end of things.
@@ -97,6 +177,12 @@ namespace WizMan
                     }
                 }
 
+
+
+                ///
+                ///bill's jumping method
+                ///
+
                 //check jumping
                 if (jumping)
                 {
@@ -113,26 +199,25 @@ namespace WizMan
 
                     inputDirection.Y += jumpSpeed;
                     jumpSpeed++;
+
                 }
 
-                ///
-                ///bill's jumping method
-                ///
-
+                //see if we can jump
                 if (!canJump && position.Y < lastPosition.Y) //if you have jumped, and if you're on the way down
                 {
                     canJump = true;
                     amountAdded = 0;
-                    Game1.audioManager.playJumpSound();
                 }
 
+                //see if we should jump
                 if (!jumping && canJump && position.Y == lastPosition.Y) //if you can jump, and you're not moving up and down
                 {
-                    if (doJump)
+                    if (doJump)//if user wants to jump
                     {
                         jumping = true;
                         jumpSpeed = -6;
                         canJump = false;
+                        Game1.audioManager.playJumpSound();
                     }
                 }
 
