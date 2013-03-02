@@ -90,7 +90,7 @@ namespace WizMan
         }
         public Vector2 getSize()
         {
-            return new Vector2(textureImage.Width, textureImage.Height);
+            return new Vector2(frameSize.X, frameSize.Y);
         }
         public void setPosition(Vector2 newPosition)
         {

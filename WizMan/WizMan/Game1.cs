@@ -45,7 +45,7 @@ namespace WizMan
         public static Menus menu;
 
         //GameState info
-        public enum GameState { MainMenu, PauseMenu, NewGame, InGame, GameOver, GameExit }
+        public enum GameState { MainMenu, PauseMenu, NewGame, InGame, GameOver, InstructionScreen, GameExit }
         public static GameState currentGameState = GameState.MainMenu;
 
         //PlayerState info
@@ -58,7 +58,7 @@ namespace WizMan
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            //fullscreen = true;
+            fullscreen = true;
 
             if (fullscreen)
             {

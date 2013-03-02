@@ -18,7 +18,8 @@ namespace WizMan
     public class Menus : Microsoft.Xna.Framework.DrawableGameComponent
     {
         //Game States
-        //enum GameState { MainMenu, PauseMenu, InGame, GameOver }
+        private Game1.GameState previousGameState;
+        private Game1.GameState savedGameState;
         KeyboardState keyboardState;
         bool keyDown = false;
         bool moveDown = false;
@@ -27,6 +28,7 @@ namespace WizMan
         //Main Menu Text
         SpriteBatch menuSpriteBatch;
         Texture2D deathScreen;
+        Texture2D instructionScreen;
         SpriteFont titleFont;
         SpriteFont menuFont;
         Color mColor;
@@ -35,6 +37,9 @@ namespace WizMan
         List<String> pauseOps;
         List<String> gameOverOps;
         int sel;
+        
+        //need a scaled rectangle for the instruciton screen to display on
+        Rectangle instRect;
 
         //three options currently
         int selMax = 2;
@@ -70,7 +75,30 @@ namespace WizMan
             menuFont = Game.Content.Load<SpriteFont>("mFont");
 
             //picture for death screen
-            deathScreen = Game.Content.Load<Texture2D>("deathScreen");
+            deathScreen = Game.Content.Load<Texture2D>("textures/deathScreen");
+
+            //picture for instructions
+            instructionScreen = Game.Content.Load<Texture2D>("textures/instructions");
+
+            //if the instruction screen is larger than the display size, we have to scale it
+            //assumes we never run on a display that's taller than it is wide
+            if (Game1.screenSize.Y < instructionScreen.Height)
+            {
+                float aR = instructionScreen.Width / instructionScreen.Height;
+                int sideBuffer = Math.Abs((int)(Game1.screenSize.Y * aR) - instructionScreen.Width)/2;
+                instRect = new Rectangle(sideBuffer, 0, (int)Game1.screenSize.X - sideBuffer*2, (int)Game1.screenSize.Y);
+            }
+            else
+            {
+                Vector2 center;
+                center.Y = Game1.screenSize.Y / 2;
+                center.X = Game1.screenSize.X / 2;
+                instRect = new Rectangle((int)center.X - instructionScreen.Width / 2,
+                    (int)center.Y - instructionScreen.Height / 2,
+                    instructionScreen.Width,
+                    instructionScreen.Height);
+            }
+
         }
 
         /// <summary>
@@ -97,6 +125,15 @@ namespace WizMan
             bool upDown = keyboardState.IsKeyDown(Keys.Up);
             bool escDown = keyboardState.IsKeyDown(Keys.Escape);
             bool enter = keyboardState.IsKeyDown(Keys.Enter);
+
+            //need to save whatever the previous menu was so we can go back to that
+            //when we do the esc key
+            if (previousGameState == Game1.GameState.MainMenu)
+                savedGameState = Game1.GameState.MainMenu;
+            if (previousGameState == Game1.GameState.PauseMenu)
+                savedGameState = Game1.GameState.PauseMenu;
+            if (previousGameState == Game1.GameState.GameOver)
+                savedGameState = Game1.GameState.GameOver;
 
             switch(Game1.currentGameState)
             {
@@ -132,10 +169,16 @@ namespace WizMan
                     {
                         enter = false; //reset for next time
                         if (sel == 0) Game1.currentGameState = Game1.GameState.NewGame;
-                        if (sel == 1) Game1.currentGameState = Game1.GameState.GameOver;
+                        if (sel == 1) Game1.currentGameState = Game1.GameState.InstructionScreen;
                         if (sel == 2) Game1.currentGameState = Game1.GameState.GameExit;
                     }
                 #endregion
+                    break;
+                case Game1.GameState.InstructionScreen:
+                    #region Instruction Screen area
+                    if (escDown)
+                        Game1.currentGameState = savedGameState;
+                    #endregion
                     break;
                 case Game1.GameState.InGame:
                     #region In Game
@@ -177,7 +220,7 @@ namespace WizMan
                     {
                         enter = false; //reset for next time
                         if (sel == 0) Game1.currentGameState = Game1.GameState.InGame;
-                        if (sel == 1) Game1.currentGameState = Game1.GameState.GameOver;
+                        if (sel == 1) Game1.currentGameState = Game1.GameState.InstructionScreen;
                         if (sel == 2) Game1.currentGameState = Game1.GameState.GameExit;
                     }
                     #endregion
@@ -214,13 +257,16 @@ namespace WizMan
                     {
                         enter = false; //reset for next time
                         if (sel == 0) Game1.currentGameState = Game1.GameState.NewGame;
-                        if (sel == 1) Game1.currentGameState = Game1.GameState.GameOver;
+                        if (sel == 1) Game1.currentGameState = Game1.GameState.InstructionScreen;
                         if (sel == 2) Game1.currentGameState = Game1.GameState.GameExit;
                     }
                 #endregion
                     break;
 
             }
+            //save the current gamestate for use next time
+            previousGameState = Game1.currentGameState;
+
             //reset for next time through
             keyDown = sDown || downDown || wDown || upDown || escDown;
             base.Update(gameTime);
@@ -247,6 +293,14 @@ namespace WizMan
                         mColor = Color.WhiteSmoke;
                         c += 20;
                     }
+                    menuSpriteBatch.End();
+                    #endregion
+                    break;
+                case Game1.GameState.InstructionScreen:
+                    #region Instruction Screen
+                    Game.GraphicsDevice.Clear(Color.Black);
+                    menuSpriteBatch.Begin();
+                    menuSpriteBatch.Draw(instructionScreen, instRect, Color.White);
                     menuSpriteBatch.End();
                     #endregion
                     break;

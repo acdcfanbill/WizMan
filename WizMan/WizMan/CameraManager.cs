@@ -80,6 +80,7 @@ namespace WizMan
             Vector2 playerPosition = Game1.spriteManager.getPlayerPosition();
             screenCenter = camera.Position + (screenSize / 2);
 
+            #region Switch the camera based on if the L button is pressed
             if (Keyboard.GetState().IsKeyDown(Keys.L))
             {
                 if (!alreadySwitch)
@@ -97,6 +98,8 @@ namespace WizMan
                 switchDirections(lookPosition);
                 alreadySwitch = true;
             }
+            #endregion
+
             //if we arn't switching directions, just follow based on the deadzone in 
             //cameraAdjustment
             if(!switchDirection)
@@ -166,7 +169,7 @@ namespace WizMan
             //to simplify this, I've just moved the camera's look position to the center X
             //coordt whenever we run this.
             Vector2 playerPosition = Game1.spriteManager.getPlayerPosition();
-
+            #region Switching Directions
             if (goingRight)
             {
                 if (playerPosition.X < screenCenter.X)
@@ -187,6 +190,7 @@ namespace WizMan
                 goingRight = true;
                 goingLeft = false;
             }
+            #endregion
         }
     }
 }

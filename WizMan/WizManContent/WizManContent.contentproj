@@ -129,8 +129,15 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="deathScreen.png">
+    <Compile Include="textures\deathScreen.png">
       <Name>deathScreen</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="textures\instructions.png">
+      <Name>instructions</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
