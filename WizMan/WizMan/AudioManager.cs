@@ -36,10 +36,6 @@ namespace WizMan
         SoundEffect shockSound;
         SoundEffect footSteps;
 
-        int elapsedFire = 0;
-        int elapsedIce = 0;
-        int elapsedWind = 0;
-        int elpsedShock = 0;
         int elapsedFootstep = 0;
 
         public override void Initialize()
@@ -47,8 +43,8 @@ namespace WizMan
             jumpSound = Game.Content.Load<SoundEffect>("sounds/jump");
             fireSound = Game.Content.Load<SoundEffect>("sounds/fire");
             iceSound = Game.Content.Load<SoundEffect>("sounds/ice");
-            windSound = Game.Content.Load<SoundEffect>("sounds/jump");
-            shockSound = Game.Content.Load<SoundEffect>("sounds/jump");
+            windSound = Game.Content.Load<SoundEffect>("sounds/wind");
+            shockSound = Game.Content.Load<SoundEffect>("sounds/shock");
             footSteps = Game.Content.Load<SoundEffect>("sounds/footsteps");
 
             base.Initialize();
@@ -82,7 +78,7 @@ namespace WizMan
 
         public void playWindSound()
         {
-            windSound.Play(1, 0, 0);
+            windSound.Play(.25f, .1f, 0);
         }
 
         public void playShockSound()

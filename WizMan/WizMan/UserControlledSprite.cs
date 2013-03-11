@@ -16,7 +16,7 @@ namespace WizMan
     public class UserControlledSprite : Sprite
     {
         //need a current power, always start with Fire
-        public Game1.Power currentPower = Game1.Power.Ice;
+        public Game1.Power currentPower = Game1.Power.Fire;
 
         public int health;
         int collisionOffset;
@@ -102,7 +102,7 @@ namespace WizMan
                 }
             }
 
-            //cyclePowers();
+            selectPower();
 
             base.Update(gameTime, clientBounds);
         }
@@ -390,6 +390,20 @@ namespace WizMan
                     Game1.audioManager.playShockSound();
                     break;
             }
+        }
+
+        void selectPower()
+        {
+            KeyboardState kb = Keyboard.GetState();
+            if(kb.IsKeyDown(Keys.D1))
+                currentPower = Game1.Power.Fire;
+            else if (kb.IsKeyDown(Keys.D2))
+                currentPower = Game1.Power.Ice;
+            else if (kb.IsKeyDown(Keys.D3))
+                currentPower = Game1.Power.Wind;
+            else if (kb.IsKeyDown(Keys.D4))
+                currentPower = Game1.Power.Shock;
+
         }
     }
 }
