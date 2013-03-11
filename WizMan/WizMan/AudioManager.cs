@@ -30,10 +30,26 @@ namespace WizMan
         /// 
         //declare and then load any sound effects we may need to play
         SoundEffect jumpSound;
+        SoundEffect fireSound;
+        SoundEffect windSound;
+        SoundEffect iceSound;
+        SoundEffect shockSound;
+        SoundEffect footSteps;
+
+        int elapsedFire = 0;
+        int elapsedIce = 0;
+        int elapsedWind = 0;
+        int elpsedShock = 0;
+        int elapsedFootstep = 0;
 
         public override void Initialize()
         {
             jumpSound = Game.Content.Load<SoundEffect>("sounds/jump");
+            fireSound = Game.Content.Load<SoundEffect>("sounds/fire");
+            iceSound = Game.Content.Load<SoundEffect>("sounds/ice");
+            windSound = Game.Content.Load<SoundEffect>("sounds/jump");
+            shockSound = Game.Content.Load<SoundEffect>("sounds/jump");
+            footSteps = Game.Content.Load<SoundEffect>("sounds/footsteps");
 
             base.Initialize();
         }
@@ -51,7 +67,39 @@ namespace WizMan
 
         public void playJumpSound()
         {
-            jumpSound.Play(0.25f,0,0);
+            jumpSound.Play(0.25f, 0, 0);
+        }
+
+        public void playFireSound()
+        {
+            fireSound.Play(.25f, 0.5f, 0);
+        }
+
+        public void playIceSound()
+        {
+            iceSound.Play(.25f, .5f, 0);
+        }
+
+        public void playWindSound()
+        {
+            windSound.Play(1, 0, 0);
+        }
+
+        public void playShockSound()
+        {
+            shockSound.Play(1, 0, 0);
+        }
+
+        public void playFootSteps(GameTime gameTime)
+        {
+            elapsedFootstep += gameTime.ElapsedGameTime.Milliseconds;
+            if (elapsedFootstep > footSteps.Duration.Milliseconds)
+            {
+                elapsedFootstep = 0;
+                footSteps.Play(.1f, 0, 0);
+            }
+            
+
         }
     }
 }

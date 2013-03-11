@@ -4,21 +4,37 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 
 namespace WizMan
 {
     public class UserControlledSprite : Sprite
     {
+        //need a current power, always start with Fire
+        public Game1.Power currentPower = Game1.Power.Ice;
+
         public int health;
+        int collisionOffset;
         bool jumping = false;
         bool canJump = true;
-        //float startY;
+        Vector2 powerSpeed = new Vector2(20, 0);
         float jumpSpeed = 0;
         int amountAdded = 0;
         Vector2 lastPosition;
+        bool stoppedJumpAnimation = false;
+        bool cnt = false;
+
+        int timeSinceLastFrame = 0;
+        GameTime localGameTime;
+        int millisecondsPerFrame;
+
+        bool goLeft;
+        bool goRight;
 
         //Constructors for User Controlled Sprites, straight from the book
         public UserControlledSprite(Texture2D textureImage, Vector2 position, Point frameSize, int collisionOffset,
@@ -27,6 +43,7 @@ namespace WizMan
                 currentFrame, sheetSize, speed)
         {
             lastPosition = position;
+            this.collisionOffset = collisionOffset;
         }
         public UserControlledSprite(Texture2D textureImage, Vector2 position, Point frameSize, int collisionOffset,
             Point currentFrame, Point sheetSize, Vector2 speed, int millisecondsPerFrame)
@@ -34,13 +51,58 @@ namespace WizMan
                 frameSize, collisionOffset, currentFrame, sheetSize, speed)
         {
             lastPosition = position;
+            this.collisionOffset = collisionOffset;
+            this.millisecondsPerFrame = millisecondsPerFrame;
         }
 
         public override void Update(GameTime gameTime, Rectangle clientBounds)
         {
+            //in case we need the game time in other places we can't pass it too.
+            localGameTime = gameTime;
+
             position += direction;
             if (this.health < 1)
                 Game1.currentGameState = Game1.GameState.GameOver;
+
+            #region check direction change for firing projectile
+            //need to see if we've changed which direction we are moving to
+            //change which way we are shooting.
+            if (position.X == lastPosition.X)
+            {
+                //not moving left or right
+            }
+            else
+            {
+                if (position.X > lastPosition.X)
+                {
+                    goRight = true;
+                    goLeft = false;
+                }
+                if (position.X < lastPosition.X)
+                {
+                    goRight = false;
+                    goLeft = true;
+                }
+            }
+            #endregion
+            if (shoot)
+            {
+                //Game1.spriteManager.projectileList.Add();
+                if (goLeft)
+                {
+                    shootSound();
+                    Game1.spriteManager.projectileList.Add(new ProjectileSprite(Game1.otherContent.Load<Texture2D>("textures/finalcastspritesheet"),
+                        Game1.spriteManager.player.position, new Point(100, 50), 0, new Point(1,0), new Point(2, 8), powerSpeed, new Vector2(-1, 0), currentPower));
+                }
+                if (goRight)
+                {
+                    shootSound();
+                    Game1.spriteManager.projectileList.Add(new ProjectileSprite(Game1.otherContent.Load<Texture2D>("textures/finalcastspritesheet"),
+                        Game1.spriteManager.player.position, new Point(100, 50), 0, new Point(0, 0), new Point(2, 8), powerSpeed, new Vector2(1, 0), currentPower));
+                }
+            }
+
+            //cyclePowers();
 
             base.Update(gameTime, clientBounds);
         }
@@ -120,20 +182,43 @@ namespace WizMan
             }
 
             //check to see if we need to step the player back in the x or y directions
+            //edited this to make him move to the collision, and not just back to where he was.
             if(noDown && currPos.Y > previousPosition.Y)
                 currPos.Y = newBottom.Y-this.frameSize.Y;//previousPosition.Y;
-            else if(noUp && currPos.Y < previousPosition.Y)
+            else if (noUp && currPos.Y < previousPosition.Y)
+            {
                 currPos.Y = newTop.Y;// previousPosition.Y;
-            if(noLeft && currPos.X < previousPosition.X)
-                currPos.X = newLeft.X+1;// previousPosition.X;
-            if(noRight && currPos.X > previousPosition.X)
-                currPos.X = newRight.X - this.frameSize.X;// previousPosition.X;
+                amountAdded = 0; //this fixes a bug where if he hits his head after a jump, the next jump is short
+            }
+            if (noLeft && currPos.X < previousPosition.X)
+                currPos.X = previousPosition.X;
+                //currPos.X = newLeft.X+1;// previousPosition.X;
+            if (noRight && currPos.X > previousPosition.X)
+                currPos.X = previousPosition.X;
+                //currPos.X = newRight.X - this.frameSize.X;// previousPosition.X;
 
             //reset the position, with adjustments if necessary
             setPosition(currPos);
             return;
         }
 
+        //Regesters that the mouse was click and a projectile should be shot
+        public Boolean shoot
+        {
+            get
+            {
+                Boolean fireProjectile = false;
+                MouseState ms = Mouse.GetState();
+
+                if (cnt)
+                {
+                    if (ms.LeftButton == ButtonState.Pressed) fireProjectile = true;
+                    cnt = false;
+                }
+                if (ms.LeftButton == ButtonState.Released) cnt = true;
+                return fireProjectile;
+            }
+        }
         //Controls player movement. Considering game gravity to be a part of player movement since it's
         //the other half of the jump end of things.
         public override Vector2 direction
@@ -146,12 +231,12 @@ namespace WizMan
                 bool doJump = false;
                 if (Keyboard.GetState().IsKeyDown(Keys.Space))
                     doJump = true;
-                bool goLeft = false;
-                if (Keyboard.GetState().IsKeyDown(Keys.D))
-                    goLeft = true;
                 bool goRight = false;
-                if (Keyboard.GetState().IsKeyDown(Keys.A))
+                if (Keyboard.GetState().IsKeyDown(Keys.D))
                     goRight = true;
+                bool goLeft = false;
+                if (Keyboard.GetState().IsKeyDown(Keys.A))
+                    goLeft = true;
                 bool goFast = false;
                 if (Keyboard.GetState().IsKeyDown(Keys.E))
                     goFast = true;
@@ -162,18 +247,35 @@ namespace WizMan
                 //check directions
                 if (goLeft)
                 {
-                    inputDirection.X += 1;
-                    if (goFast)
+                    timeSinceLastFrame += localGameTime.ElapsedGameTime.Milliseconds;
+                    if (!jumping && canJump && position.Y == lastPosition.Y)
+                        Game1.audioManager.playFootSteps(localGameTime);
+                    if (timeSinceLastFrame > millisecondsPerFrame)
                     {
-                        inputDirection.X += 1f;
+                        timeSinceLastFrame = 0;
+                        leftAnimation();
                     }
-                }
-                if (goRight)
-                {
                     inputDirection.X -= 1;
                     if (goFast)
                     {
                         inputDirection.X -= 1f;
+                    }
+                }
+                if (goRight)
+                {
+                    timeSinceLastFrame += localGameTime.ElapsedGameTime.Milliseconds;
+                    if (!jumping && canJump && position.Y == lastPosition.Y)
+                        Game1.audioManager.playFootSteps(localGameTime);
+                    if (timeSinceLastFrame > millisecondsPerFrame)
+                    {
+                        timeSinceLastFrame = 0;
+                        rightAnimation();
+                    }
+                    inputDirection.X += 1;
+                    if (goFast)
+                    {
+                        rightAnimation();
+                        inputDirection.X += 1f;
                     }
                 }
 
@@ -190,6 +292,8 @@ namespace WizMan
                     {
                         jumping = false;
                         amountAdded = 0;
+                        Game1.spriteManager.player.jumpAnimation();
+                        stoppedJumpAnimation = true;
                     }
                     if (doJump && amountAdded <= 6)
                     {
@@ -201,7 +305,6 @@ namespace WizMan
                     jumpSpeed++;
 
                 }
-
                 //see if we can jump
                 if (!canJump && position.Y < lastPosition.Y) //if you have jumped, and if you're on the way down
                 {
@@ -212,6 +315,10 @@ namespace WizMan
                 //see if we should jump
                 if (!jumping && canJump && position.Y == lastPosition.Y) //if you can jump, and you're not moving up and down
                 {
+                    if (stoppedJumpAnimation == true) {
+                        Game1.spriteManager.player.doneJumping();
+                        stoppedJumpAnimation = false;
+                    }
                     if (doJump)//if user wants to jump
                     {
                         jumping = true;
@@ -251,5 +358,38 @@ namespace WizMan
             this.health -= health;
         }
         #endregion
+
+        //override collisionRect for hte player so he can move closer to the blocks on the
+        //left/right sides.  top/bottom areleft alone.
+        public override Rectangle collisionRect
+        {
+            get
+            {
+                return new Rectangle(
+                    (int)position.X - collisionOffset+22,
+                    (int)position.Y - collisionOffset,
+                    frameSize.X + (collisionOffset)-44,
+                    frameSize.Y + (collisionOffset));
+            }
+        }
+
+        public void shootSound()
+        {
+            switch (currentPower)
+            {
+                case Game1.Power.Fire:
+                    Game1.audioManager.playFireSound();
+                    break;
+                case Game1.Power.Ice:
+                    Game1.audioManager.playIceSound();
+                    break;
+                case Game1.Power.Wind:
+                    Game1.audioManager.playWindSound();
+                    break;
+                case Game1.Power.Shock:
+                    Game1.audioManager.playShockSound();
+                    break;
+            }
+        }
     }
 }

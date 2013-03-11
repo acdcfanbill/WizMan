@@ -7,9 +7,14 @@ Content\textures\topBackground.xnb
 Content\textures\tempWall.xnb
 Content\textures\clouds.xnb
 Content\textures\clearPixel.xnb
+Content\textures\deathScreen.xnb
+Content\textures\instructions.xnb
+Content\finalsheet.xnb
+Content\textures\finalcastspritesheet.xnb
 Content\jump.xnb
 Content\sounds\jump.xnb
+Content\sounds\fire.xnb
+Content\sounds\footsteps.xnb
+Content\sounds\ice.xnb
 Content\SpriteFont1.xnb
 Content\mFont.xnb
-Content\textures\instructions.xnb
-Content\textures\deathScreen.xnb

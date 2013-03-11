@@ -40,6 +40,10 @@ namespace WizMan
         FarthestBackground farthestBackground;
         Clouds clouds;
 
+        //fires projectile if true
+        //Boolean fireProjectile
+        public List<ProjectileSprite> projectileList;
+
         public SpriteManager(Game game)
             : base(game)
         {
@@ -53,6 +57,7 @@ namespace WizMan
         public override void Initialize()
         {
             // TODO: Add your initialization code here
+            projectileList = new List<ProjectileSprite>();
 
             base.Initialize();
         }
@@ -62,8 +67,8 @@ namespace WizMan
             //Loads the player's sprite
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             player = new UserControlledSprite(
-                Game.Content.Load<Texture2D>("wizard"), new Vector2 (0, 250), new Point (69, 143), 1, new Point (0, 0), new Point(1, 1),
-                new Vector2(6, 6));
+                Game.Content.Load<Texture2D>("finalsheet"), new Vector2 (0, 250), new Point (140, 169), 1, new Point (0, 0), new Point(5, 10),
+                new Vector2(6, 6), 120);
             player.addHealth(100);
 
             worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2 (0, 700),
@@ -115,6 +120,30 @@ namespace WizMan
                 previousPosition = player.getPosition();
                 //update the player based on the keyboard input
                 player.Update(gameTime, Game.Window.ClientBounds);
+
+                //checks to see if a projectile should be shot 
+                //if true adds new projectile to projectile list
+                //going to do this elsewhere
+
+                //fireProjectile = player.shoot;
+                //if (fireProjectile)
+                //{
+                //    projectileList.Add(new ProjectileSprite(Game.Content.Load<Texture2D>("projectile"), new Vector2(player.getPosition().X + 25, player.getPosition().Y), new Point(30, 30), 1, new Point(0, 0), new Point(1, 1),
+                //    new Vector2(6, 6), new Vector2(Mouse.GetState().X, Mouse.GetState().Y)));
+                //}
+
+                foreach (ProjectileSprite s in projectileList)
+                {
+                    if(s.isAlive())
+                        s.Update(gameTime, Game.Window.ClientBounds);
+                    //if (!s.isAlive())
+                    //    projectileList.Remove(s);
+                }
+
+                //remove dead projectiles
+                for (int i = 0; i < projectileList.Count-1; i++)
+                    if (!projectileList[i].isAlive())
+                        projectileList.RemoveAt(i);
 
                 //Update each sprite in list
                 foreach (Sprite s in spriteList)
@@ -183,6 +212,10 @@ namespace WizMan
                 foreach (Sprite w in worldList)
                 {
                     w.Draw(gameTime, spriteBatch);
+                }
+                foreach (ProjectileSprite s in projectileList)
+                {
+                    s.Draw(gameTime, spriteBatch);
                 }
                 spriteBatch.End();
             }

@@ -52,19 +52,19 @@ namespace WizMan
             title = "WIZ MAN";
             menuOps = new List<string>();
             menuOps.Add("Start New Game");
-            menuOps.Add("Instructions (currently exits)");
+            menuOps.Add("Instructions");
             menuOps.Add("Exit Game");
 
             //pause menu
             pauseOps = new List<string>();
             pauseOps.Add("Resume Game");
-            pauseOps.Add("Instructions (currently exits)");
+            pauseOps.Add("Instructions");
             pauseOps.Add("Exit Game");
 
             //game over menu
             gameOverOps = new List<string>();
             gameOverOps.Add("Start a New Game");
-            gameOverOps.Add("Instructions (currently exits)");
+            gameOverOps.Add("Instructions");
             gameOverOps.Add("Exit Game");
  
             //start with the top option

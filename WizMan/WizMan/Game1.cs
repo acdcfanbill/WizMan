@@ -31,6 +31,9 @@ namespace WizMan
         GraphicsDeviceManager graphics;
         public static SpriteBatch spriteBatch;
 
+        //want to load content in other places
+        public static ContentManager otherContent;
+
         //graphics properties
         private int preferredWidth;
         private int preferredHeight;
@@ -49,16 +52,19 @@ namespace WizMan
         public static GameState currentGameState = GameState.MainMenu;
 
         //PlayerState info
-        public enum PlayerState { Standing, Running, Jumping, Falling };
-        public static PlayerState currentPlayerState = PlayerState.Standing;
+        //no time to impliment this, going unused :(
+        //public enum PlayerState { Standing, Running, Jumping, Falling };
+        //public static PlayerState currentPlayerState = PlayerState.Standing;
 
+        //powers enum
+        public enum Power { Fire, Ice, Wind, Shock }
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            fullscreen = true;
+            //fullscreen = true;
 
             if (fullscreen)
             {
@@ -102,6 +108,8 @@ namespace WizMan
             Components.Add(menu);
             //spriteManager.Enabled = false;
             //spriteManager.Visible = false;
+
+            otherContent = Content;
 
 
             //make sure to start off in the Main Menu

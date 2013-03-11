@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace WizMan
 {
@@ -18,7 +19,7 @@ namespace WizMan
         int collisionOffset;
         int timeSinceLastFrame = 0;
         int millisecondsPerFrame;
-        const int defaultMillisecondsPerFrame = 16; //60 FPS
+        const int defaultMillisecondsPerFrame = 120; //60 FPS
         protected Vector2 speed;
         protected Vector2 position;
 
@@ -47,24 +48,26 @@ namespace WizMan
             this.millisecondsPerFrame = millisecondsPerFrame;
         }
 
-        public virtual void Update(GameTime gameTime, Rectangle clientBounds) {
-            //Moves the sprite sheet along with each image. This will make our
-            //animation down the line much easier.
-            //If it gets to the end of the sprite sheet, it goes down one row and keeps moving
-            //If it exceeds the number of rectangles on the sheet, it starts over at the first one
-            timeSinceLastFrame += gameTime.ElapsedGameTime.Milliseconds;
-            if (timeSinceLastFrame > millisecondsPerFrame) {
-                timeSinceLastFrame = 0;
-                ++currentFrame.X;
-                if (currentFrame.X >= sheetSize.X) {
-                    currentFrame.X = 0;
-                    ++currentFrame.Y;
-                    if (currentFrame.Y >= sheetSize.Y) {
-                        currentFrame.Y = 0;
-                    }
+        public virtual void Update(GameTime gameTime, Rectangle clientBounds){
+            /*I made these methods such that we can call them from wherever
+            so that if the wizard gets a power, we can just call the correct
+             animation method rather than writing in a bunch of conditional stuff
+             here. Same for jumping. I think that'll work better?*/
 
-                }
-            }
+            //getting rid of this here, because it fucks up when other classes inherit from Sprite
+
+            //timeSinceLastFrame += gameTime.ElapsedGameTime.Milliseconds;
+            //if (timeSinceLastFrame > millisecondsPerFrame)
+            //{
+            //    timeSinceLastFrame = 0;
+            //    if (Keyboard.GetState().IsKeyDown(Keys.D)) {
+            //        rightAnimation();
+            //    }
+            //    if (Keyboard.GetState().IsKeyDown(Keys.A)) {
+            //        leftAnimation();
+            //    }
+            //}
+
         }
         //Overrideable draw method and direction method for controlling and drawing sprites
         public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
@@ -72,7 +75,7 @@ namespace WizMan
                 frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
         }
 
-        public Rectangle collisionRect
+        public virtual Rectangle collisionRect
         {
             get
             {
@@ -96,6 +99,33 @@ namespace WizMan
         {
             this.position = newPosition;
         }
+
+        public void rightAnimation() {
+            Game1.spriteManager.player.currentFrame.Y = 0;
+            ++Game1.spriteManager.player.currentFrame.X;
+            if (Game1.spriteManager.player.currentFrame.X > 3)
+            {
+                Game1.spriteManager.player.currentFrame.X = 0;
+            }
+        }
+
+        public void leftAnimation() {
+            Game1.spriteManager.player.currentFrame.Y = 1;
+            ++Game1.spriteManager.player.currentFrame.X;
+            if (Game1.spriteManager.player.currentFrame.X > 3)
+            {
+                Game1.spriteManager.player.currentFrame.X = 0;
+            }
+        }
+
+        #region JumpAnimations
+        public void jumpAnimation() {
+            Game1.spriteManager.player.currentFrame.X = 4;
+        }
+        public void doneJumping() {
+            Game1.spriteManager.player.currentFrame.X = 0;
+        }
+        #endregion JumpAnimations
     }
 }
 
