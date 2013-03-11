@@ -14,10 +14,10 @@ namespace WizMan
         //Treating the wizard.png as a sprite sheet that is 1x1. Update logic reflects that
         Texture2D textureImage;
         protected Point frameSize;
-        Point currentFrame;
+        public Point currentFrame;
         Point sheetSize;
         int collisionOffset;
-        int timeSinceLastFrame = 0;
+        //int timeSinceLastFrame = 0;
         int millisecondsPerFrame;
         const int defaultMillisecondsPerFrame = 120; //60 FPS
         protected Vector2 speed;

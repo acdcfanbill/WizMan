@@ -238,8 +238,12 @@ namespace WizMan
                 if (Keyboard.GetState().IsKeyDown(Keys.A))
                     goLeft = true;
                 bool goFast = false;
-                if (Keyboard.GetState().IsKeyDown(Keys.E))
+                int localMsPerFrame = millisecondsPerFrame;
+                if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+                {
                     goFast = true;
+                    localMsPerFrame -= 75;
+                }
 
                 //adjust position for gravity
                 inputDirection.Y += 2;
@@ -250,7 +254,7 @@ namespace WizMan
                     timeSinceLastFrame += localGameTime.ElapsedGameTime.Milliseconds;
                     if (!jumping && canJump && position.Y == lastPosition.Y)
                         Game1.audioManager.playFootSteps(localGameTime);
-                    if (timeSinceLastFrame > millisecondsPerFrame)
+                    if (timeSinceLastFrame > localMsPerFrame)
                     {
                         timeSinceLastFrame = 0;
                         leftAnimation();
@@ -266,7 +270,7 @@ namespace WizMan
                     timeSinceLastFrame += localGameTime.ElapsedGameTime.Milliseconds;
                     if (!jumping && canJump && position.Y == lastPosition.Y)
                         Game1.audioManager.playFootSteps(localGameTime);
-                    if (timeSinceLastFrame > millisecondsPerFrame)
+                    if (timeSinceLastFrame > localMsPerFrame)
                     {
                         timeSinceLastFrame = 0;
                         rightAnimation();
@@ -274,7 +278,6 @@ namespace WizMan
                     inputDirection.X += 1;
                     if (goFast)
                     {
-                        rightAnimation();
                         inputDirection.X += 1f;
                     }
                 }

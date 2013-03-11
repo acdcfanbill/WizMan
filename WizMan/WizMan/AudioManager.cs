@@ -36,6 +36,11 @@ namespace WizMan
         SoundEffect shockSound;
         SoundEffect footSteps;
 
+        Song endTitles;
+
+        Song backgroundMusic;
+        bool firstTime = true;
+
         int elapsedFootstep = 0;
 
         public override void Initialize()
@@ -46,6 +51,9 @@ namespace WizMan
             windSound = Game.Content.Load<SoundEffect>("sounds/wind");
             shockSound = Game.Content.Load<SoundEffect>("sounds/shock");
             footSteps = Game.Content.Load<SoundEffect>("sounds/footsteps");
+
+            backgroundMusic = Game.Content.Load<Song>("sounds/Abdication_backgroundmusic");
+            endTitles = Game.Content.Load<Song>("sounds/tronlegacy-endtitles");
 
             base.Initialize();
         }
@@ -94,8 +102,27 @@ namespace WizMan
                 elapsedFootstep = 0;
                 footSteps.Play(.1f, 0, 0);
             }
-            
+        }
 
+        public void playBackgroundMusic()
+        {
+            if (firstTime == true)
+            {
+                MediaPlayer.Volume = 0.05f;
+                MediaPlayer.Play(backgroundMusic);
+                MediaPlayer.IsRepeating = true;
+                firstTime = false;
+            }
+            else
+                MediaPlayer.Resume();
+        }
+
+        public void playCredits()
+        {
+            MediaPlayer.Volume = 0.05f;
+            MediaPlayer.Play(endTitles);
+            //MediaPlayer.IsRepeating = true;
+            //firstTime = true;
         }
     }
 }

@@ -32,6 +32,7 @@ namespace WizMan
         List<Sprite> worldList = new List<Sprite>();
         List<SimpleSprite> backgrounds = new List<SimpleSprite>();
         List<DamageSprite> damageList = new List<DamageSprite>();
+        List<DestructableSprite> desList = new List<DestructableSprite>();
 
         //furthest away tiled background
         Texture2D topBackground;
@@ -71,14 +72,8 @@ namespace WizMan
                 new Vector2(6, 6), 120);
             player.addHealth(100);
 
-            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2 (0, 700),
-               new Point (608, 108), 2, new Point (0, 0), new Point(1, 1), Vector2.Zero));
-            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(512, 500),
-               new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
-            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(1000, 700),
-                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
-            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(600, 200),
-                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            //Function that creates all the sprites in the tower
+            worldMaker();
             
             
             //list of sprites that will do damage
@@ -87,9 +82,10 @@ namespace WizMan
 
             //load a mid background, trying it say, 5 tiles wide, the i* 1024 comes from knowing the width of this texture.
             //also, the -512 is to start off to the side a bit so we don't see it.
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 6; i++)
             {
-                backgrounds.Add(new SimpleSprite(Game.Content.Load<Texture2D>("textures/tempWall"), new Vector2(i*1024-512, -128)));
+                for(int j = 0; j < 2; j++)
+                    backgrounds.Add(new SimpleSprite(Game.Content.Load<Texture2D>("textures/tempWall"), new Vector2(i*1024-512, -128+-j*1024)));
             }
 
 
@@ -134,8 +130,23 @@ namespace WizMan
 
                 foreach (ProjectileSprite s in projectileList)
                 {
-                    if(s.isAlive())
+                    if (s.isAlive())
+                    {
                         s.Update(gameTime, Game.Window.ClientBounds);
+                        foreach (DestructableSprite d in desList)
+                        {
+                            if (!d.canPassThru)
+                            {
+                                if (s.collisionRect.Intersects(d.collisionRect))
+                                {
+                                    //projectile collides with a destructable sprite
+                                    //handle it and kill the projectile
+                                    d.handleCollision(s);
+                                    s.alive = false;
+                                }
+                            }
+                        }
+                    }
                     //if (!s.isAlive())
                     //    projectileList.Remove(s);
                 }
@@ -158,6 +169,15 @@ namespace WizMan
                     if(w.collisionRect.Intersects(player.collisionRect))
                     {
                         wList.Add(w);
+                    }
+                }
+                //check for collisions with destructable objects
+                foreach (DestructableSprite d in desList)
+                {
+                    d.Update(gameTime, Game.Window.ClientBounds);
+                    if (!d.canPassThru && d.collisionRect.Intersects(player.collisionRect))
+                    {
+                        wList.Add(d);
                     }
                 }
                 //handle all the sprite collisions
@@ -217,6 +237,10 @@ namespace WizMan
                 {
                     s.Draw(gameTime, spriteBatch);
                 }
+                foreach (Sprite d in desList)
+                {
+                    d.Draw(gameTime, spriteBatch);
+                }
                 spriteBatch.End();
             }
             base.Draw(gameTime);
@@ -233,5 +257,92 @@ namespace WizMan
         {
             return player.getPosition();
         }
+
+        //function to create whole level
+        public void worldMaker()
+        {
+            #region longblocks
+            //Long Blocks
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(0, 700),
+               new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(512, 400),
+               new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(1000, 700),
+                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(2300, 550),
+                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            //Constrained Jump Puzzle Blocks (CJP blocks)
+            //Bottom part of CJP
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(3200, 550),
+                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(4000, 550),
+                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            //Top part of CJP
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(3400, 100),
+                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("worldspriteplaceholder"), new Vector2(4008, 100),
+                new Point(608, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            #endregion
+
+            #region squareblocks
+            //Square Blocks
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("textures/block2"), new Vector2(1800, 700),
+                new Point(108, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("textures/block2"), new Vector2(2000, 550),
+                new Point(108, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("textures/block2"), new Vector2(2200, -82),
+                new Point(108, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            //Elevating Puzzle Blocks
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("textures/block2"), new Vector2(5100, 550),
+                new Point(108, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("textures/block2"), new Vector2(5300, 250),
+                new Point(108, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("textures/block2"), new Vector2(5000, 150),
+                new Point(108, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            #endregion
+
+            #region vines
+            //First Vines (Counted by the order in which you encounter them)
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(2200, 350),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(2200, 242),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(2200, 134),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(2200, 26),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(2254, 350),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(2254, 242),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(2254, 134),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(2254, 26),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+
+            //constrained jump puzzle vines
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(4000, 442),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(3904, 208),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+
+            //Elevating Puzzle Vines
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(5300, 142),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(5354, 142),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+
+            //Vines before goal
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(4562, -8),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            desList.Add(new DestructableSprite(Game.Content.Load<Texture2D>("textures/vinespritesheet2"), new Vector2(4562, -116),
+                new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
+            #endregion
+            #region goalblock
+            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("textures/powerpedestalsprite"), new Vector2(3400, -8),
+                new Point(108, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            #endregion
+        }
+
     }
 }

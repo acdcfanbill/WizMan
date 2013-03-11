@@ -48,7 +48,7 @@ namespace WizMan
         public static Menus menu;
 
         //GameState info
-        public enum GameState { MainMenu, PauseMenu, NewGame, InGame, GameOver, InstructionScreen, GameExit }
+        public enum GameState { StartUp, MainMenu, Credits, PauseMenu, NewGame, InGame, GameOver, YouWin, InstructionScreen, GameExit }
         public static GameState currentGameState = GameState.MainMenu;
 
         //PlayerState info
@@ -95,25 +95,19 @@ namespace WizMan
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            //Creates the sprite manager and lets us use it.
-            //Sprite manager handles the drawing for the player's sprite and various enemies.
-            //Might also be able to use it for environmental objects such as boxes or rocks or platforms
-            //spriteManager = new SpriteManager(this);
-            //cameraManager = new CameraManager(this, GraphicsDevice.Viewport);
-            //audioManager = new AudioManager(this);
-            menu = new Menus(this);
-            //Components.Add(spriteManager);
-            //Components.Add(cameraManager);
-            //Components.Add(audioManager);
+            menu = new Menus(this); 
             Components.Add(menu);
-            //spriteManager.Enabled = false;
-            //spriteManager.Visible = false;
 
+            //audioManager
+            audioManager = new AudioManager(this);
+            Components.Add(audioManager);
+
+            //this is for other classes
             otherContent = Content;
 
 
-            //make sure to start off in the Main Menu
-            currentGameState = GameState.MainMenu;
+            //make sure to start off in Startup
+            currentGameState = GameState.StartUp;
             base.Initialize();
 
 
@@ -150,6 +144,8 @@ namespace WizMan
         {
             switch (currentGameState)
             {
+                case GameState.StartUp:
+                    break;
                 case GameState.MainMenu:
                     //spriteManager.Enabled = false;
                     //spriteManager.Visible = false;
@@ -157,10 +153,8 @@ namespace WizMan
                 case GameState.NewGame:
                     spriteManager = new SpriteManager(this);
                     cameraManager = new CameraManager(this, GraphicsDevice.Viewport);
-                    audioManager = new AudioManager(this);
                     Components.Add(spriteManager);
                     Components.Add(cameraManager);
-                    Components.Add(audioManager);
                     currentGameState = GameState.InGame;
                     break;
                 case GameState.InGame:
@@ -171,12 +165,21 @@ namespace WizMan
                     spriteManager.Enabled = false;
                     spriteManager.Visible = false;
                     break;
+                case GameState.Credits:
+                    //spriteManager.Enabled = false;
+                    //spriteManager.Visible = false;
+                    break;
                 case GameState.GameOver:
                     spriteManager.Enabled = false;
                     spriteManager.Visible = false;
                     Components.Remove(spriteManager);
                     Components.Remove(cameraManager);
-                    Components.Remove(audioManager);
+                    break;
+                case GameState.YouWin:
+                    spriteManager.Enabled = false;
+                    spriteManager.Visible = false;
+                    Components.Remove(spriteManager);
+                    Components.Remove(cameraManager);
                     break;
                 case GameState.GameExit:
                     this.Exit();

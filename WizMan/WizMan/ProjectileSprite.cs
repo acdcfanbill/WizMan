@@ -12,7 +12,7 @@ namespace WizMan
     public class ProjectileSprite : Sprite
     {
         private Texture2D _texture;
-        Game1.Power projType;
+        public Game1.Power projType;
         Vector2 drction;
         float timeAlive;
         public bool alive;
@@ -50,8 +50,14 @@ namespace WizMan
 
         public override void Update(GameTime gameTime, Rectangle clientBounds)
         {
+            clientBounds.X = (int)Game1.cameraManager.camera.Position.X;
+            clientBounds.Y = (int)Game1.cameraManager.camera.Position.Y;
             timeAlive += gameTime.ElapsedGameTime.Milliseconds;
-            if (timeAlive > 10000)
+            if (timeAlive > 2000)
+                alive = false;
+            if (this.collisionRect.Intersects(clientBounds))
+                alive = true;
+            else
                 alive = false;
             //gameTime.ElapsedGameTime.TotalMilliseconds.
             position += drction * speed;

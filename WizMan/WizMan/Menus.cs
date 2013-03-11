@@ -24,11 +24,19 @@ namespace WizMan
         bool keyDown = false;
         bool moveDown = false;
         bool moveUp = false;
+
+        //music stuff
+        bool noMusic = true;
         
         //Main Menu Text
         SpriteBatch menuSpriteBatch;
         Texture2D deathScreen;
         Texture2D instructionScreen;
+        Texture2D companyScreen;
+        Texture2D presentsScreen;
+        Texture2D gameScreen;
+        Texture2D white;
+        Texture2D credits;
         SpriteFont titleFont;
         SpriteFont menuFont;
         Color mColor;
@@ -38,8 +46,12 @@ namespace WizMan
         List<String> gameOverOps;
         int sel;
         
+        //startup timing
+        int msSinceStart = 0;
+
         //need a scaled rectangle for the instruciton screen to display on
         Rectangle instRect;
+        Rectangle startRect;
 
         //three options currently
         int selMax = 2;
@@ -53,6 +65,7 @@ namespace WizMan
             menuOps = new List<string>();
             menuOps.Add("Start New Game");
             menuOps.Add("Instructions");
+            menuOps.Add("Credits");
             menuOps.Add("Exit Game");
 
             //pause menu
@@ -65,6 +78,7 @@ namespace WizMan
             gameOverOps = new List<string>();
             gameOverOps.Add("Start a New Game");
             gameOverOps.Add("Instructions");
+            gameOverOps.Add("Credits");
             gameOverOps.Add("Exit Game");
  
             //start with the top option
@@ -73,6 +87,15 @@ namespace WizMan
             //Text For menu 
             titleFont = Game.Content.Load<SpriteFont>("SpriteFont1");
             menuFont = Game.Content.Load<SpriteFont>("mFont");
+
+            //pictures for startup
+            companyScreen = Game.Content.Load<Texture2D>("textures/DTPlogo");
+            presentsScreen = Game.Content.Load<Texture2D>("textures/presentsscreen");
+            gameScreen = Game.Content.Load<Texture2D>("textures/introscreen");
+            white = Game.Content.Load<Texture2D>("textures/white");
+
+            //credit scren
+            credits = Game.Content.Load<Texture2D>("textures/creditscreen");
 
             //picture for death screen
             deathScreen = Game.Content.Load<Texture2D>("textures/deathScreen");
@@ -137,8 +160,18 @@ namespace WizMan
 
             switch(Game1.currentGameState)
             {
+                case Game1.GameState.StartUp:
+                    msSinceStart += gameTime.ElapsedGameTime.Milliseconds;
+                    if(!keyDown && enter)
+                        msSinceStart = 6001;
+                    if (msSinceStart > 6000)
+                        Game1.currentGameState = Game1.GameState.MainMenu;
+                    break;
                 case Game1.GameState.MainMenu:
                     #region Main Menu
+                    MediaPlayer.Stop();
+                    noMusic = true;
+                    selMax = menuOps.Count-1;
                     if (!keyDown && (sDown || downDown))
                     {
                         keyDown = true;
@@ -165,12 +198,13 @@ namespace WizMan
                         moveUp = false;
                     }
 
-                    if (enter)
+                    if (!keyDown && enter)
                     {
                         enter = false; //reset for next time
                         if (sel == 0) Game1.currentGameState = Game1.GameState.NewGame;
                         if (sel == 1) Game1.currentGameState = Game1.GameState.InstructionScreen;
-                        if (sel == 2) Game1.currentGameState = Game1.GameState.GameExit;
+                        if (sel == 2) Game1.currentGameState = Game1.GameState.Credits;
+                        if (sel == 3) Game1.currentGameState = Game1.GameState.GameExit;
                     }
                 #endregion
                     break;
@@ -182,6 +216,11 @@ namespace WizMan
                     break;
                 case Game1.GameState.InGame:
                     #region In Game
+                    if (noMusic)
+                    {
+                        noMusic = false;
+                        Game1.audioManager.playBackgroundMusic();
+                    }
                     if (!keyDown && escDown)
                     {
                         Game1.currentGameState = Game1.GameState.PauseMenu;
@@ -190,6 +229,9 @@ namespace WizMan
                     break;
                 case Game1.GameState.PauseMenu:
                     #region Pause Menu
+                    selMax = pauseOps.Count - 1;
+                    noMusic = true;
+                    MediaPlayer.Pause();
                     if (!keyDown && (sDown || downDown))
                     {
                         keyDown = true;
@@ -225,8 +267,20 @@ namespace WizMan
                     }
                     #endregion
                     break;
+                case Game1.GameState.Credits:
+                    #region Credits
+                    //Game1.audioManager.playCredits();
+                    //won't play audio correctly, leaving out
+                    noMusic = true;
+                    if (!keyDown && escDown)
+                        Game1.currentGameState = savedGameState;
+                    #endregion
+                    break;
                 case Game1.GameState.GameOver:
                     #region GameOver
+                    MediaPlayer.Stop();
+                    noMusic = true;
+                    selMax = gameOverOps.Count - 1;
                     if (!keyDown && (sDown || downDown))
                     {
                         keyDown = true;
@@ -258,7 +312,8 @@ namespace WizMan
                         enter = false; //reset for next time
                         if (sel == 0) Game1.currentGameState = Game1.GameState.NewGame;
                         if (sel == 1) Game1.currentGameState = Game1.GameState.InstructionScreen;
-                        if (sel == 2) Game1.currentGameState = Game1.GameState.GameExit;
+                        if (sel == 2) Game1.currentGameState = Game1.GameState.Credits;
+                        if (sel == 3) Game1.currentGameState = Game1.GameState.GameExit;
                     }
                 #endregion
                     break;
@@ -268,7 +323,7 @@ namespace WizMan
             previousGameState = Game1.currentGameState;
 
             //reset for next time through
-            keyDown = sDown || downDown || wDown || upDown || escDown;
+            keyDown = sDown || downDown || wDown || upDown || escDown || enter;
             base.Update(gameTime);
         }
 
@@ -277,20 +332,61 @@ namespace WizMan
             int c = 0;
             switch (Game1.currentGameState)
             {
+                case Game1.GameState.StartUp:
+                    #region Start Up
+                    Game.GraphicsDevice.Clear(Color.Black);
+                    menuSpriteBatch.Begin();
+                    if(msSinceStart > 0 && msSinceStart < 2000)
+                    {
+                        startRect.X = ((int)Game1.screenSize.X - companyScreen.Width) / 2;
+                        startRect.Y = ((int)Game1.screenSize.Y - companyScreen.Height) / 2;
+                        startRect.Width = companyScreen.Width;
+                        startRect.Height = companyScreen.Height;
+                        menuSpriteBatch.Draw(companyScreen,startRect,Color.White);
+                    }
+                    if (msSinceStart >= 2000 && msSinceStart < 3000)
+                    {
+                        startRect.X = ((int)Game1.screenSize.X - presentsScreen.Width) / 2;
+                        startRect.Y = ((int)Game1.screenSize.Y - presentsScreen.Height) / 2;
+                        startRect.Width = presentsScreen.Width;
+                        startRect.Height = presentsScreen.Height;
+                        menuSpriteBatch.Draw(presentsScreen, startRect, Color.White);
+                    }
+                    if(msSinceStart >= 3000 && msSinceStart < 6000)
+                    {
+                        startRect.X = ((int)Game1.screenSize.X - gameScreen.Width) / 2;
+                        startRect.Y = ((int)Game1.screenSize.Y - gameScreen.Height) / 2;
+                        startRect.Width = gameScreen.Width;
+                        startRect.Height = gameScreen.Height;
+                        menuSpriteBatch.Draw(gameScreen, startRect, Color.White);
+                    }
+                    menuSpriteBatch.End();
+                    #endregion
+                    break;
                 case Game1.GameState.MainMenu:
                     #region Main Menu
                     Game.GraphicsDevice.Clear(Color.Black);
                     menuSpriteBatch.Begin();
+                    startRect.X = ((int)Game1.screenSize.X - gameScreen.Width) / 2;
+                    startRect.Y = ((int)Game1.screenSize.Y - gameScreen.Height) / 2;
+                    startRect.Width = gameScreen.Width;
+                    startRect.Height = gameScreen.Height;
+                    menuSpriteBatch.Draw(gameScreen, startRect, Color.White);
+                    startRect.X = ((int)Game1.screenSize.X - white.Width) / 2;
+                    startRect.Y = ((int)Game1.screenSize.Y - white.Height) / 2;
+                    startRect.Width = white.Width;
+                    startRect.Height = white.Height;
+                    menuSpriteBatch.Draw(white, startRect, Color.White);
                     menuSpriteBatch.DrawString(titleFont, title,
                                             new Vector2((Game.Window.ClientBounds.Width / 2) - (titleFont.MeasureString(title).X / 2),
                                                         (Game.Window.ClientBounds.Height / 2) - (titleFont.MeasureString(title).Y / 2) - 50), Color.Gold);
-                    for (int i = 0; i <= 2; i++)
+                    for (int i = 0; i <= menuOps.Count-1; i++)
                     {
                         if (sel == i) mColor = Color.Red;
                         menuSpriteBatch.DrawString(menuFont, menuOps[i],
                                             new Vector2((Game.Window.ClientBounds.Width / 2) - (titleFont.MeasureString(title).X / 2),
                                                         (Game.Window.ClientBounds.Height / 2) - (titleFont.MeasureString(title).Y / 2) + c), mColor);
-                        mColor = Color.WhiteSmoke;
+                        mColor = Color.Black;
                         c += 20;
                     }
                     menuSpriteBatch.End();
@@ -316,7 +412,7 @@ namespace WizMan
                     menuSpriteBatch.DrawString(titleFont, title,
                                             new Vector2((Game.Window.ClientBounds.Width / 2) - (titleFont.MeasureString(title).X / 2),
                                                         (Game.Window.ClientBounds.Height / 2) - (titleFont.MeasureString(title).Y / 2) - 50), Color.Gold);
-                    for (int i = 0; i <= 2; i++)
+                    for (int i = 0; i <= pauseOps.Count-1; i++)
                     {
                         if (sel == i) mColor = Color.Red;
                         menuSpriteBatch.DrawString(menuFont, pauseOps[i],
@@ -337,7 +433,7 @@ namespace WizMan
                     menuSpriteBatch.DrawString(titleFont, title,
                                             new Vector2((Game.Window.ClientBounds.Width / 2) - (titleFont.MeasureString(title).X / 2),
                                                         (Game.Window.ClientBounds.Height / 2) - (titleFont.MeasureString(title).Y / 2) - 50), Color.Gold);
-                    for (int i = 0; i <= 2; i++)
+                    for (int i = 0; i <= gameOverOps.Count-1; i++)
                     {
                         if (sel == i) mColor = Color.Red;
                         menuSpriteBatch.DrawString(menuFont, gameOverOps[i],
@@ -348,6 +444,14 @@ namespace WizMan
                     }
                     menuSpriteBatch.End();
                 #endregion
+                    break;
+                case Game1.GameState.Credits:
+                    #region Credits
+                    Game.GraphicsDevice.Clear(Color.Black);
+                    menuSpriteBatch.Begin();
+                    menuSpriteBatch.Draw(credits, instRect, Color.White);
+                    menuSpriteBatch.End();
+                    #endregion
                     break;
                 case Game1.GameState.GameExit:
                     #region Game Exit
