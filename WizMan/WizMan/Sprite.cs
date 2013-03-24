@@ -100,8 +100,8 @@ namespace WizMan
             this.position = newPosition;
         }
 
-        public void rightAnimation() {
-            Game1.spriteManager.player.currentFrame.Y = 0;
+        public void rightAnimation(int powerOffset) {
+            Game1.spriteManager.player.currentFrame.Y = powerOffset+1;
             ++Game1.spriteManager.player.currentFrame.X;
             if (Game1.spriteManager.player.currentFrame.X > 3)
             {
@@ -109,8 +109,8 @@ namespace WizMan
             }
         }
 
-        public void leftAnimation() {
-            Game1.spriteManager.player.currentFrame.Y = 1;
+        public void leftAnimation(int powerOffset) {
+            Game1.spriteManager.player.currentFrame.Y = powerOffset+0;
             ++Game1.spriteManager.player.currentFrame.X;
             if (Game1.spriteManager.player.currentFrame.X > 3)
             {

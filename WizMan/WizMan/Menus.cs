@@ -35,6 +35,7 @@ namespace WizMan
         Texture2D companyScreen;
         Texture2D presentsScreen;
         Texture2D gameScreen;
+        Texture2D winScreen;
         Texture2D white;
         Texture2D credits;
         SpriteFont titleFont;
@@ -48,6 +49,7 @@ namespace WizMan
         
         //startup timing
         int msSinceStart = 0;
+        int msSinceWin = 0;
 
         //need a scaled rectangle for the instruciton screen to display on
         Rectangle instRect;
@@ -93,6 +95,9 @@ namespace WizMan
             presentsScreen = Game.Content.Load<Texture2D>("textures/presentsscreen");
             gameScreen = Game.Content.Load<Texture2D>("textures/introscreen");
             white = Game.Content.Load<Texture2D>("textures/white");
+
+            //win screen
+            winScreen = Game.Content.Load<Texture2D>("textures/victoryscreen");
 
             //credit scren
             credits = Game.Content.Load<Texture2D>("textures/creditscreen");
@@ -161,14 +166,17 @@ namespace WizMan
             switch(Game1.currentGameState)
             {
                 case Game1.GameState.StartUp:
+                    #region Start Up
                     msSinceStart += gameTime.ElapsedGameTime.Milliseconds;
                     if(!keyDown && enter)
                         msSinceStart = 6001;
                     if (msSinceStart > 6000)
                         Game1.currentGameState = Game1.GameState.MainMenu;
+                    #endregion
                     break;
                 case Game1.GameState.MainMenu:
                     #region Main Menu
+                    msSinceWin = 0;
                     MediaPlayer.Stop();
                     noMusic = true;
                     selMax = menuOps.Count-1;
@@ -274,6 +282,15 @@ namespace WizMan
                     noMusic = true;
                     if (!keyDown && escDown)
                         Game1.currentGameState = savedGameState;
+                    #endregion
+                    break;
+                case Game1.GameState.YouWin:
+                    #region You Win
+                    msSinceWin += gameTime.ElapsedGameTime.Milliseconds;
+                    if(!keyDown && enter)
+                        msSinceWin = 5001;
+                    if (msSinceWin > 5000)
+                        Game1.currentGameState = Game1.GameState.MainMenu;
                     #endregion
                     break;
                 case Game1.GameState.GameOver:
@@ -450,6 +467,18 @@ namespace WizMan
                     Game.GraphicsDevice.Clear(Color.Black);
                     menuSpriteBatch.Begin();
                     menuSpriteBatch.Draw(credits, instRect, Color.White);
+                    menuSpriteBatch.End();
+                    #endregion
+                    break;
+                case Game1.GameState.YouWin:
+                    #region You Win
+                    Game.GraphicsDevice.Clear(Color.Black);
+                    menuSpriteBatch.Begin();
+                    startRect.X = ((int)Game1.screenSize.X - winScreen.Width) / 2;
+                    startRect.Y = ((int)Game1.screenSize.Y - winScreen.Height) / 2;
+                    startRect.Width = winScreen.Width;
+                    startRect.Height = winScreen.Height;
+                    menuSpriteBatch.Draw(winScreen, startRect, Color.White);
                     menuSpriteBatch.End();
                     #endregion
                     break;

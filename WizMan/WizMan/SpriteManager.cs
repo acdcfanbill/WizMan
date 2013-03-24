@@ -33,6 +33,7 @@ namespace WizMan
         List<SimpleSprite> backgrounds = new List<SimpleSprite>();
         List<DamageSprite> damageList = new List<DamageSprite>();
         List<DestructableSprite> desList = new List<DestructableSprite>();
+        EndGame endSprite;
 
         //furthest away tiled background
         Texture2D topBackground;
@@ -68,7 +69,7 @@ namespace WizMan
             //Loads the player's sprite
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             player = new UserControlledSprite(
-                Game.Content.Load<Texture2D>("finalsheet"), new Vector2 (0, 250), new Point (140, 169), 1, new Point (0, 0), new Point(5, 10),
+                Game.Content.Load<Texture2D>("finalsheet"), new Vector2 (0, 250), new Point (140, 169), 1, new Point (2, 3), new Point(5, 10),
                 new Vector2(6, 6), 120);
             player.addHealth(100);
 
@@ -116,6 +117,10 @@ namespace WizMan
                 previousPosition = player.getPosition();
                 //update the player based on the keyboard input
                 player.Update(gameTime, Game.Window.ClientBounds);
+
+                //check to see if the game or level is over
+                if(player.collisionRect.Intersects(endSprite.collisionRect))
+                    endSprite.handleCollision();
 
                 //checks to see if a projectile should be shot 
                 //if true adds new projectile to projectile list
@@ -241,6 +246,7 @@ namespace WizMan
                 {
                     d.Draw(gameTime, spriteBatch);
                 }
+                endSprite.Draw(gameTime,spriteBatch);
                 spriteBatch.End();
             }
             base.Draw(gameTime);
@@ -339,8 +345,8 @@ namespace WizMan
                 new Point(54, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero, false, Game1.Power.Fire));
             #endregion
             #region goalblock
-            worldList.Add(new WorldSprite(Game.Content.Load<Texture2D>("textures/powerpedestalsprite"), new Vector2(3400, -8),
-                new Point(108, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero));
+            endSprite = new EndGame(Game.Content.Load<Texture2D>("textures/powerpedestalsprite"), new Vector2(3400, -8),
+                new Point(108, 108), 2, new Point(0, 0), new Point(1, 1), Vector2.Zero);
             #endregion
         }
 

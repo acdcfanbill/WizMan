@@ -29,6 +29,8 @@ namespace WizMan
         bool stoppedJumpAnimation = false;
         bool cnt = false;
 
+        int powerOffset;
+
         int timeSinceLastFrame = 0;
         GameTime localGameTime;
         int millisecondsPerFrame;
@@ -102,7 +104,24 @@ namespace WizMan
                 }
             }
 
+            Game1.Power tempPower = currentPower;
             selectPower();
+            if (currentPower == Game1.Power.Fire)
+                powerOffset = 2;
+            if (currentPower == Game1.Power.Ice)
+                powerOffset = 4;
+            if (currentPower == Game1.Power.Wind)
+                powerOffset = 6;
+            if (currentPower == Game1.Power.Shock)
+                powerOffset = 8;
+            //if we have changed powers, we need to update the picture of the wizman
+            if (tempPower != currentPower)
+            {
+                if (goLeft)
+                    leftAnimation(powerOffset);
+                else
+                    rightAnimation(powerOffset); 
+            }
 
             base.Update(gameTime, clientBounds);
         }
@@ -257,7 +276,7 @@ namespace WizMan
                     if (timeSinceLastFrame > localMsPerFrame)
                     {
                         timeSinceLastFrame = 0;
-                        leftAnimation();
+                        leftAnimation(powerOffset);
                     }
                     inputDirection.X -= 1;
                     if (goFast)
@@ -273,7 +292,7 @@ namespace WizMan
                     if (timeSinceLastFrame > localMsPerFrame)
                     {
                         timeSinceLastFrame = 0;
-                        rightAnimation();
+                        rightAnimation(powerOffset);
                     }
                     inputDirection.X += 1;
                     if (goFast)

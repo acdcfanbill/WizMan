@@ -134,6 +134,7 @@
     <Compile Include="CameraManager.cs" />
     <Compile Include="Couds.cs" />
     <Compile Include="DestructableSprites.cs" />
+    <Compile Include="EndGame.cs" />
     <Compile Include="FarthestBackground.cs" />
     <Compile Include="DamageSprite.cs" />
     <Compile Include="Menus.cs" />
